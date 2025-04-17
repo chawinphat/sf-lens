@@ -8,53 +8,47 @@ cred = credentials.Certificate("keys/sf-lens-1f4d9-firebase-adminsdk-fbsvc-73c09
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
-doc_ref = db.collection("attractions").document("testattraction")
-# doc_ref.set({"first": "Ada", "last": "Lovelace", "born": 1815})
-doc_ref.set({"id":0, "name": "attraction", "location": "Lovelace", "images": 1815, "description":"blah", "reviews":"hi", "special":"hi"})
-
-
-users_ref = db.collection("attractions")
-docs = users_ref.stream()
-
-for doc in docs:
-    print(f"{doc.id} => {doc.to_dict()}")
 
 
 @app.route('/')
 def index():
     return 'Hello from Flask!'
 
-# @app.route('/getuser/<name>')
-# def getuser(name):
-#     return
+@app.route('/users', methods=['POST'])
+def add_user():
+    data = request.get_json(force=True)
+    name = data.get('username')
+    password = data.get('password')
+    email = data.get('email')
+    attraction_ids = []
 
+    # (optional) you could check for missing fields here
 
-# @app.route('/getattraction/<name>',  methods=['GET'])
-# def getuser(name):
-#     return
+    # now write only those fields to Firestore
+    user_ref = db.collection('users').add({
+        'username': name,
+        'password': password,
+        'email': email
+    })
+    return {'id': user_ref[1].id}, 201
 
 @app.route('/search', methods=['GET'])
 def search_attractions():
-    # pull query params
     name = request.args.get('name')
     location = request.args.get('location')
-    prefix = request.args.get('prefix')  # for “starts with” searches
+    prefix = request.args.get('prefix') 
 
-    # start a base query
     query = db.collection('attractions')
     
-    # exact‐match filters
     if name:
         query = query.where('name', '==', name)
     if location:
         query = query.where('location', '==', location)
 
-    # prefix (Firestore can do simple “starts with” via range)
     if prefix:
         end = prefix + '\uf8ff'
         query = query.order_by('name').start_at([prefix]).end_at([end])
     
-    # execute
     results = [doc.to_dict() | {'name': doc.id} for doc in query.stream()]
     return jsonify(results), 200
 
