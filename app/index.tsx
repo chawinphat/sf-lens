@@ -1,8 +1,8 @@
-import { Redirect } from 'expo-router';
-import React from 'react';
+import { Redirect } from "expo-router";
+import React from "react";
 
-const Home = () => {
+const Entry = () => {
   return <Redirect href="/(auth)/SplashScreen" />;
 };
 
-export default Home;
+export default Entry;
