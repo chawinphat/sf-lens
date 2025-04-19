@@ -1,10 +1,27 @@
-import { Slot, Stack } from "expo-router";
+import { Stack } from "expo-router";
+import React from "react";
 
-export const unstable_settings = {
-  initialRouteName: '(tabs)',
-};
+import "../global.css";
 
 export default function RootLayout() {
-  //   return <Stack />;
-  return <Slot screenOptions={{ headerShown: false }} />;
+  // splash screen
+
+  return (
+    <Stack>
+      <Stack.Screen
+        name="index"
+        options={{
+          headerShown: false,
+          animation: "fade",
+        }}
+      />
+      <Stack.Screen
+        name="(auth)"
+        options={{
+          headerShown: false,
+          animation: "fade",
+        }}
+      />
+    </Stack>
+  )
 }
