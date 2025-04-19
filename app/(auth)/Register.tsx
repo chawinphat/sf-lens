@@ -39,7 +39,7 @@ const Register = () => {
       return;
     }
     if (!passwordStrong) {
-      alert("Password must be at least 8 characters, include uppercase, lowercase, and a number or symbol.");
+      alert("Password must be at least 8 characters, include at least one uppercase letter, one lowercase letter, and one number.");
       return;
     }
     register(email, password, username);
@@ -107,7 +107,7 @@ const Register = () => {
 
           {password.length > 0 && !passwordStrong && (
             <Text className="text-sm text-red-500 mt-1">
-              ❌ Password must be at least 8 characters, include uppercase, lowercase, a number, and a symbol.
+              ❌ Password must be at least 8 characters, include at least one uppercase letter, one lowercase letter, and one number.
             </Text>
           )}
           {password.length > 0 && passwordStrong && (
