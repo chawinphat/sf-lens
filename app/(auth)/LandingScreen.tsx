@@ -34,9 +34,10 @@ const LandingScreen = () => {
             </TouchableOpacity>
           ))}
         </View>
-        {/* Google sign in button - not used for now */}
+        
+        {/* Google sign in button - need create credentials */}
         <TouchableOpacity
-          onPress={() => {}}
+          onPress={() => router.push("/SignGoogle")}
           className="flex-row items-center bg-white py-3 px-5 rounded-xl border border-gray-300 w-full justify-center mb-5"
         >
           <Image
