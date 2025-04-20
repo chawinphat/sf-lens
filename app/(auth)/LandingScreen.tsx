@@ -34,7 +34,7 @@ const LandingScreen = () => {
             </TouchableOpacity>
           ))}
         </View>
-        
+
         {/* Google sign in button - need create credentials */}
         <TouchableOpacity
           onPress={() => router.push("/SignGoogle")}
@@ -50,7 +50,7 @@ const LandingScreen = () => {
         </TouchableOpacity>
 
         {/* Guest button - not used for now */}
-        <TouchableOpacity onPress={() => console.log("guest")}>
+        <TouchableOpacity onPress={() => router.push("/(tabs)/Home")}>
           <Text className="text-black underline text-sm mt-2">
             EXPLORE AS GUEST
           </Text>
