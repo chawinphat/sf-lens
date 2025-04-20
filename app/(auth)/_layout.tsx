@@ -19,6 +19,14 @@ const Layout = () => {
         name="Register"
         options={{ headerTitle: "Register", headerBackTitle: "Back" }}
       />
+      <Stack.Screen
+        name="SignGoogle"
+        options={{
+          headerTitle: "Sign in with Google",
+          headerBackTitle: "Back",
+        }}
+      />
+
     </Stack>
   );
 };
