@@ -14,7 +14,7 @@ const SplashScreen = () => {
 
   // Redirect to the landing screen after loading
   if (!loading) {
-    return <Redirect href="/LandingScreen" />;
+    return <Redirect href="../(auth)/LandingScreen" />;
   }
 
   return (
