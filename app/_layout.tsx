@@ -7,7 +7,7 @@ export default function RootLayout() {
   // splash screen
 
   return (
-    <Stack>
+    <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen
         name="index"
         options={{

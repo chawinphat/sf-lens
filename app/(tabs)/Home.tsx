@@ -3,6 +3,7 @@ import SearchBar from "@/components/SearchBar";
 import TagList from "@/components/TagList";
 import { useAuthStore } from "@/store/authStore";
 import React, { useState } from "react";
+import { useRouter } from "expo-router";
 import {
   FlatList,
   Image,
@@ -14,6 +15,7 @@ import {
 } from "react-native";
 
 const Home = () => {
+  const router = useRouter();
   const { user } = useAuthStore();
 
   const [query, setQuery] = useState("");
@@ -35,30 +37,40 @@ const Home = () => {
 
   const landmarks = [
     {
+      id: 1,
       image:
         "https://images.unsplash.com/photo-1519627745017-8f1c7ec8d37d?q=80&w=2584&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       tag: "Building",
+      name: "Transamerica Pyramid",
     },
     {
+      id: 2,
       image:
         "https://images.unsplash.com/photo-1719858403455-9a2582eca805?q=80&w=2598&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       tag: "Culture",
+      name: "Golden Gate Bridge",
     },
     {
+      id: 3,
       image:
         "https://images.unsplash.com/photo-1576912656434-b1a36d08fb3e?q=80&w=2574&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       tag: "Culture",
+      name: "Alcatraz Island",
     },
 
     {
+      id: 4,
       image:
         "https://images.unsplash.com/photo-1610478125655-52767177cca9?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       tag: "Building",
+      name: "Pier 39",
     },
     {
+      id: 5,
       image:
         "https://images.unsplash.com/photo-1619045786810-2e1027a9f324?q=80&w=2574&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       tag: "Culture",
+      name: "Fisherman's Wharf",
     },
   ]; // replace w/filtered data
 
@@ -135,12 +147,20 @@ const Home = () => {
           showsHorizontalScrollIndicator={false}
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item }) => (
-            <View className="w-[250] h-[400] bg-white rounded-3xl mr-5">
+            <Pressable
+              onPress={() =>
+                router.push({
+                  pathname: "../landmark/[lmid]",
+                  params: { lmid: item.name },
+                })
+              }
+              className="w-[250] h-[400] bg-white rounded-3xl mr-5 overflow-hidden"
+            >
               <Image
                 source={{ uri: item.image }}
                 className="w-full h-full object-cover rounded-3xl"
               />
-            </View>
+            </Pressable>
           )}
         />
       </View>
