@@ -1,4 +1,3 @@
-import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -12,9 +11,10 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useAuth } from "../../authentication/AuthContext";
 
 const Register = () => {
-  const { register, user } = useAuthStore();
+  const { register, user, loading, updateProfile } = useAuth();
   const router = useRouter();
 
   const [username, setUsername] = useState("");
@@ -25,15 +25,15 @@ const Register = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
-    if (user) {
+    if (!loading && user) {
       router.replace("/(tabs)/Home");
     }
-  }, [user]);
+  }, [user, loading]);
 
   const passwordsMatch = password === confirmPassword;
   const passwordStrong = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d|[^a-zA-Z\d]).{8,}$/.test(password);
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (!passwordsMatch) {
       alert("Passwords do not match");
       return;
@@ -42,7 +42,11 @@ const Register = () => {
       alert("Password must be at least 8 characters, include at least one uppercase letter, one lowercase letter, and one number.");
       return;
     }
-    register(email, password, username);
+    const newUserCred = await register(email, password, username);
+    await updateProfile(newUserCred.user, { username });
+  await newUserCred.user.reload();
+  router.replace("/(tabs)/Home");
+
   };
 
   return (
