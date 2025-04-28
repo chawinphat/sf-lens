@@ -20,14 +20,22 @@ export interface Review {
   createdAt: Date;
 }
 
-export type Category = "Culture" | "History" | "Building" | "Museums"; // can be extended
+export type Category =
+  | "Culture"
+  | "History"
+  | "Building"
+  | "Museums"
+  | "Neighborhoods"
+  | "Views"
+  | "Parks"; // can be extended
 
 export interface Attraction {
   id: string;
   name: string;
   overview: string;
   location: LatLng;
-  images: string[];
+  images_landscape: string[];
+  images_portrait: string;
   special?: string;
-  tags: Category;
+  tags: Category[];
 }
