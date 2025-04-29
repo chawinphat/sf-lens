@@ -74,7 +74,7 @@ const Home = () => {
         {/* avatar generater */}
         <Image
           source={{
-            uri: "https://avatar.iran.liara.run/public",
+            uri: user?.photoURL || "https://avatar.iran.liara.run/public",
           }}
           className="h-16 w-16 block object-contain border-2 border-gray-700 rounded-full"
         />

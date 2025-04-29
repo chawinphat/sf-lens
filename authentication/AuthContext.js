@@ -23,19 +23,18 @@ export function AuthProvider({ children }) {
     return unsub;
   }, []);
 
-  const register = (email, password, username) => {
-    return _register(auth, email, password)
-      .then(userCredential => {
-        return updateProfile(auth.currentUser, { displayName: username })
-          .then(() => {
-            setUser(auth.currentUser);
-            return userCredential;
-          });
-      })
-      .catch(error => {
-        console.error("Registration or profile update failed:", error);
-        throw error;
-      });
+  const register = async (email, password, username) => {
+    try {
+      const userCredential = await _register(auth, email, password);
+      await updateProfile(auth.currentUser, { displayName: username });
+      const avatarUrl = `https://avatar.iran.liara.run/public/${auth.currentUser.uid}`;
+      await updateProfile(auth.currentUser, { photoURL: avatarUrl });
+      setUser(auth.currentUser);
+      return userCredential;
+    } catch (error) {
+      console.error("Registration or profile update failed:", error);
+      throw error;
+    }
   };
   
   const login    = (email, password) => _login(auth, email, password);

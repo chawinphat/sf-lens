@@ -34,7 +34,7 @@ const AttractionCard = ({ item }: Props) => {
       }
       className="w-[250] h-[400] bg-white rounded-3xl mr-5 overflow-hidden"
     >
-      {item.images_portrait == null || (
+      {typeof item.images_portrait === 'string' && item.images_portrait.length > 0 && (
         <>
           <Image
             source={{ uri: item.images_portrait }}
