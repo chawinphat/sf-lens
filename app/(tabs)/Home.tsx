@@ -59,7 +59,7 @@ const Home = () => {
           }}
         />
       )}
-      <View className="flex flex-row justify-between items-center px-5 mt-20 mx-5">
+      <View className="flex flex-row justify-between items-start px-5 mt-[10%] mx-5">
         <View className="flex flex-col gap-2">
           <Text className="text-3xl font-bold">Hi, {user?.username}</Text>
           <Text className="text-xl font-semibold text-gray-500">
@@ -73,11 +73,11 @@ const Home = () => {
           source={{
             uri: "https://avatar.iran.liara.run/public",
           }}
-          className="h-16 w-16 block object-contain border-2 border-gray-700 rounded-full mt-10"
+          className="h-16 w-16 block object-contain border-2 border-gray-700 rounded-full"
         />
       </View>
 
-      <View className="mx-5 px-5 mt-6 relative z-30">
+      <View className="mx-5 px-5 mt-[2%] relative z-30">
         <SearchBar
           searchByNameCode={(t) => {
             setQuery(t);
@@ -98,17 +98,17 @@ const Home = () => {
           onClose={() => setOpen(false)}
         />
       </View>
-      <View className="mt-3 mx-5 px-5">
+      <View className="mt-[3%] mx-5 px-5">
         <TagList
           categories={categories}
           selectedCategory={selectedCategory}
           onSelectCategory={setSelectedCategory}
         ></TagList>
       </View>
-      <View className="flex flex-row justify-between items-center mt-3 mx-5 px-5">
+      <View className="flex flex-row justify-between items-center mt-[3%] mx-5 px-5">
         <Text className="text-xl font-bold">LANDMARKS you might like</Text>
       </View>
-      <View className="mt-3 mx-5 px-5">
+      <View className="mt-[3%] mx-5 px-5">
         <FlatList
           data={displayedLandmarks}
           horizontal
