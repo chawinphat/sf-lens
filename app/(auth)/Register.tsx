@@ -43,8 +43,6 @@ const Register = () => {
       return;
     }
     const newUserCred = await register(email, password, username);
-    await updateProfile(newUserCred.user, { username });
-  await newUserCred.user.reload();
   router.replace("/(tabs)/Home");
 
   };
