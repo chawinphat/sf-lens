@@ -5,6 +5,7 @@ const Layout = () => {
   return (
     <Tabs>
       <Tabs.Screen name="Home" options={{ headerShown: false }} />
+      <Tabs.Screen name="Profile Screen" options={{ headerShown: false }} />
     </Tabs>
   );
 };

@@ -8,11 +8,14 @@ import {
   FlatList,
   Image,
   Keyboard,
+  Modal,
   Pressable,
   SafeAreaView,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
+import Avatar from "@/components/Avatar";
 
 const Home = () => {
   const router = useRouter();
@@ -74,10 +77,20 @@ const Home = () => {
     },
   ]; // replace w/filtered data
 
+
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const [showModal, setShowModal] = useState(false)
+
+  const handleUpload = (uri: string) => {
+    setAvatarUrl(uri)
+    setShowModal(false)
+  }
+
   const displayedLandmarks =
     selectedCategory === "All"
       ? landmarks
       : landmarks.filter((landmark) => landmark.tag === selectedCategory);
+
 
   return (
     <SafeAreaView className="flex-1">
@@ -101,12 +114,15 @@ const Home = () => {
         </View>
 
         {/* avatar generater */}
-        <Image
-          source={{
-            uri: "https://avatar.iran.liara.run/public",
-          }}
-          className="h-16 w-16 block object-contain border-2 border-gray-700 rounded-full mt-10"
-        />
+        <Pressable onPress={() => Avatar}>
+          <Image
+            source={{
+              uri: "https://avatar.iran.liara.run/public",
+            }}
+            className="h-16 w-16 block object-contain border-2 border-gray-700 rounded-full mt-10"
+          />
+        
+        </Pressable>
       </View>
 
       <View className="mx-5 px-5 mt-6 relative z-30">
