@@ -1,9 +1,8 @@
 import Dropdown from "@/components/Dropdown";
 import SearchBar from "@/components/SearchBar";
 import TagList from "@/components/TagList";
-import { useAuthStore } from "@/store/authStore";
 import React, { useState } from "react";
-import { useRouter } from "expo-router";
+import { useAuth } from "@/authentication/AuthContext";
 import {
   FlatList,
   Image,
@@ -17,8 +16,7 @@ import AttractionCard from "@/components/AttractionCard";
 import { attractions } from "@/constants/attractions";
 
 const Home = () => {
-  const router = useRouter();
-  const { user } = useAuthStore();
+  const { user } = useAuth();
 
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
@@ -61,7 +59,9 @@ const Home = () => {
       )}
       <View className="flex flex-row justify-between items-start px-5 mt-[10%] mx-5">
         <View className="flex flex-col gap-2">
-          <Text className="text-3xl font-bold">Hi, {user?.username}</Text>
+          <Text className="text-3xl font-bold">
+            Hi {user?.displayName || "Guest"},{" "}
+          </Text>
           <Text className="text-xl font-semibold text-gray-500">
             Welcome to
           </Text>
@@ -71,6 +71,7 @@ const Home = () => {
         {/* avatar generater */}
         <Image
           source={{
+            // uri: user?.photoURL || "https://avatar.iran.liara.run/public", // TODO: fix
             uri: "https://avatar.iran.liara.run/public",
           }}
           className="h-16 w-16 block object-contain border-2 border-gray-700 rounded-full"

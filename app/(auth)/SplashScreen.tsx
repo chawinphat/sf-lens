@@ -1,10 +1,12 @@
 import { Redirect } from "expo-router";
 import { useEffect, useState } from "react";
+import { useAuth } from "../../authentication/AuthContext";
+
 import { Image, Text, View } from "react-native";
 
 const SplashScreen = () => {
   const [loading, setLoading] = useState(true);
-
+  const { user } = useAuth();
   // loading time, can load data here
   useEffect(() => {
     setTimeout(() => {
@@ -14,7 +16,13 @@ const SplashScreen = () => {
 
   // Redirect to the landing screen after loading
   if (!loading) {
+    if (user) {
+      return <Redirect href="/(tabs)/Home" />;
+    }
+    else {
     return <Redirect href="../(auth)/LandingScreen" />;
+    }
+
   }
 
   return (

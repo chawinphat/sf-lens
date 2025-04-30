@@ -1,4 +1,4 @@
-import { useAuthStore } from "@/store/authStore";
+import { useAuth } from "../../authentication/AuthContext";
 import { useRouter, useFocusEffect } from "expo-router";
 import React, { useEffect, useState, useCallback } from "react";
 import {
@@ -12,7 +12,7 @@ import {
 } from "react-native";
 
 const Login = () => {
-  const { login, loading, error, user, clearError } = useAuthStore();
+  const { login, loading, error, user, clearError } = useAuth();
   const router = useRouter();
 
   const [email, setEmail] = useState("");
