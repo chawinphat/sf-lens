@@ -2,11 +2,30 @@
 // can be nested into folder (tabs)/profile if needed
 import { useAuth } from "@/authentication/AuthContext";
 import React from "react";
-import { Image, Pressable, SafeAreaView, Text, View } from "react-native";
+import {
+  Alert,
+  Image,
+  Pressable,
+  SafeAreaView,
+  Text,
+  View,
+} from "react-native";
 
 const Profile = () => {
   const { user, logout } = useAuth();
   const username = user?.displayName ?? "Guest";
+
+  const confirmLogout = () => {
+    Alert.alert(
+      "Log Out",
+      "Are you sure you want to log out?",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Log Out", style: "destructive", onPress: () => logout() },
+      ],
+      { cancelable: true }
+    );
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -39,7 +58,7 @@ const Profile = () => {
             label: "Bookmarks",
             onPress: () => {},
           },
-          { label: "Logout", onPress: logout },
+          { label: "Logout", onPress: confirmLogout },
         ].map(({ label, onPress }) => (
           <Pressable
             key={label}
