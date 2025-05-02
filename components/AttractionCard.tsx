@@ -8,9 +8,10 @@ import { LinearGradient } from "expo-linear-gradient";
 
 type Props = {
   item: Attraction;
+  small?: boolean;
 };
 
-const AttractionCard = ({ item }: Props) => {
+const AttractionCard = ({ item, small }: Props) => {
   const userLoc = useUserLocation();
 
   let distanceText = "";
@@ -32,37 +33,43 @@ const AttractionCard = ({ item }: Props) => {
           params: { lmid: item.id },
         })
       }
-      className="w-[250] h-[400] bg-white rounded-3xl mr-5 overflow-hidden"
+      // className="w-[250] h-[400] bg-white rounded-3xl mr-5 overflow-hidden"
+      className={
+        small
+          ? "w-[170] h-[272] bg-white rounded-3xl overflow-hidden"
+          : "w-[250] h-[400] bg-white rounded-3xl mr-5 overflow-hidden"
+      }
     >
-      {typeof item.images_portrait === 'string' && item.images_portrait.length > 0 && (
-        <>
-          <Image
-            source={{ uri: item.images_portrait }}
-            className="w-full h-full object-cover rounded-3xl"
-          />
-          <View className="absolute bottom-0 w-full">
-            <LinearGradient
-              colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.8)"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 0, y: 1 }}
-              className="absolute inset-0"
-            >
-              <Text className="text-lg font-semibold text-white px-4 pt-6">
-                {item.name}
-              </Text>
-              {userLoc && (
-                <View className="flex flex-row gap-x-1 px-4 pb-5 pt-1">
-                  <Image
-                    source={require("../assets/icons/ic_marker.png")}
-                    className="w-4 h-4 block object-contain"
-                  />
-                  <Text className="text-white">{distanceText}</Text>
-                </View>
-              )}
-            </LinearGradient>
-          </View>
-        </>
-      )}
+      {typeof item.images_portrait === "string" &&
+        item.images_portrait.length > 0 && (
+          <>
+            <Image
+              source={{ uri: item.images_portrait }}
+              className="w-full h-full object-cover rounded-3xl"
+            />
+            <View className="absolute bottom-0 w-full">
+              <LinearGradient
+                colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.8)"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                className="absolute inset-0"
+              >
+                <Text className="text-lg font-semibold text-white px-4 pt-6">
+                  {item.name}
+                </Text>
+                {userLoc && (
+                  <View className="flex flex-row gap-x-1 px-4 pb-5 pt-1">
+                    <Image
+                      source={require("../assets/icons/ic_marker.png")}
+                      className="w-4 h-4 block object-contain"
+                    />
+                    <Text className="text-white">{distanceText}</Text>
+                  </View>
+                )}
+              </LinearGradient>
+            </View>
+          </>
+        )}
     </Pressable>
   );
 };

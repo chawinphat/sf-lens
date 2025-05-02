@@ -15,6 +15,7 @@ import { Attraction, Review, User, LatLng } from "@/common/types";
 import ReviewItem from "@/components/ReviewItem";
 import { NativeSyntheticEvent } from "react-native";
 import { attractions } from "@/constants/attractions";
+import { useBookmarkStore } from "@/store/bookmarkStore";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -95,6 +96,9 @@ export default function LandmarkDetail() {
     setTab(tabs[page]);
   };
 
+  const has = useBookmarkStore((s) => s.hasBookmark(lmid as string));
+  const toggle = useBookmarkStore((s) => s.toggle);
+
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       {/* header */}
@@ -109,8 +113,13 @@ export default function LandmarkDetail() {
           {/* <Pressable onPress={() => {}} className="p-2">
             <Feather name="share-2" size={24} color="#000" />
           </Pressable> */}
-          <Pressable onPress={() => {}} className="p-2">
-            <Feather name="bookmark" size={24} color="#000" />
+          <Pressable onPress={() => toggle(lmid as string)} className="p-2">
+            {/* <Feather name="bookmark" size={24} color="#000" /> */}
+            <Ionicons
+              name={has ? "bookmark" : "bookmark-outline"}
+              size={24}
+              color={has ? "#F59E0B" : "#000"}
+            />
           </Pressable>
         </View>
       </View>
