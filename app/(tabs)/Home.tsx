@@ -14,8 +14,10 @@ import {
 } from "react-native";
 import AttractionCard from "@/components/AttractionCard";
 import { attractions } from "@/constants/attractions";
+import { useRouter } from "expo-router";
 
 const Home = () => {
+  const router = useRouter();
   const { user } = useAuth();
 
   const [query, setQuery] = useState("");
@@ -78,7 +80,7 @@ const Home = () => {
         />
       </View>
 
-      <View className="mx-5 px-5 mt-[2%] relative z-30">
+      <View className="mx-5 px-5 mt-[2%] relative z-50">
         <SearchBar
           searchByNameCode={(t) => {
             setQuery(t);
@@ -94,7 +96,16 @@ const Home = () => {
           items={filtered}
           onSelect={(item) => {
             setQuery(item);
-            // …do something…
+            // navigate to the selected item
+            const selectedItem = attractions.find(
+              (attraction) => attraction.name === item
+            );
+            if (selectedItem) {
+              router.push({
+                pathname: "../landmark/[lmid]",
+                params: { lmid: selectedItem.id },
+              });
+            }
           }}
           onClose={() => setOpen(false)}
         />
