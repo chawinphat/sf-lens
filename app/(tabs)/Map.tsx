@@ -51,7 +51,7 @@ export default function MapScreen() {
   const sheetRef = useRef<BottomSheet>(null);
   const mapRef = useRef<MapView>(null);
 
-  const snapPoints = ["50%"];
+  const snapPoints = ["40%"];
 
   const openDirections = useCallback((lat: number, lng: number) => {
     const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
