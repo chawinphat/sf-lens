@@ -96,7 +96,7 @@ export default function MapScreen() {
       {/* Map Container */}
       <View className="flex-1 w-full">
         {/* Search Bar */}
-        <View className="absolute top-20 w-full px-4 z-10">
+        <View className="absolute top-16 w-full px-4 z-10">
           <SearchBar
             searchBarPlaceHolder="Search attractions..."
             searchByNameCode={setQuery}
