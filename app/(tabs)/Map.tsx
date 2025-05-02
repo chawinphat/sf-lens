@@ -1,134 +1,179 @@
 // MapScreen.tsx
-// A React Native map screen using @gorhom/bottom-sheet with pan-down-to-close, sourcing pins from constants/attractions.
+// A React Native map screen using @gorhom/bottom-sheet, sourcing pins from constants/attractions, styled with nativewind like Home.
 
 import React, { useRef, useState, useCallback, useMemo } from "react";
-import { View, Text, Image, Pressable, Linking, Dimensions, StyleSheet } from "react-native";
+import { View, Text, Image, Pressable, ScrollView, Linking } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import MapView, { Marker, PROVIDER_DEFAULT, Region } from "react-native-maps";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { attractions } from "@/constants/attractions";
 import type { Attraction } from "@/common/types";
-
-// Pin type derived from Attraction
-interface Pin {
-  id: string;
-  latitude: number;
-  longitude: number;
-  name: string;
-  description: string;
-  imageUrl: string;
-}
-
+import { useRouter } from "expo-router";
 export default function MapScreen() {
+  const router = useRouter();
   const [region, setRegion] = useState<Region>({
     latitude: 37.78825,
     longitude: -122.4324,
     latitudeDelta: 0.0922,
     longitudeDelta: 0.0421,
   });
-  const [selectedPin, setSelectedPin] = useState<Pin | null>(null);
+  const [selected, setSelected] = useState<Attraction | null>(null);
 
-  // BottomSheet ref and snap points
   const sheetRef = useRef<BottomSheet>(null);
-  const snapPoints = useMemo(() => ["40%"], []);
+  const mapRef = useRef<MapView>(null);
 
-  // Build pins array from attractions constant
-  const pins: Pin[] = useMemo(
-    () =>
-      attractions.map((a: Attraction) => ({
-        id: a.id,
-        latitude: a.location.latitude,
-        longitude: a.location.longitude,
-        name: a.name,
-        description: a.overview,
-        imageUrl: a.images_landscape[0] || a.images_portrait || "",
-      })),
-    []
-  );
+  const snapPoints = ["50%"];
 
   const openDirections = useCallback((lat: number, lng: number) => {
     const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
     Linking.openURL(url);
   }, []);
 
-  const handleMarkerPress = useCallback((pin: Pin) => {
-    setSelectedPin(pin);
-    sheetRef.current?.expand();
-  }, []);
+  const onMarkerPress = useCallback((id: string) => {
+      const item = attractions.find((a) => a.id === id) || null;
+      if (!item) return;
 
-  const handleClose = useCallback(() => {
+      mapRef.current?.animateToRegion(
+        {
+          latitude: item.location.latitude,
+          longitude: item.location.longitude,
+          latitudeDelta: region.latitudeDelta,
+          longitudeDelta: region.longitudeDelta,
+        },
+        300 /* duration in ms */
+      );
+      setSelected(item);
+      sheetRef.current?.expand();
+    },
+    [region]
+  );
+
+  const onClose = useCallback(() => {
     sheetRef.current?.close();
-    setSelectedPin(null);
+    setSelected(null);
   }, []);
 
   return (
-    <GestureHandlerRootView style={styles.container}>
-      {/* Map */}
-      <MapView
-        provider={PROVIDER_DEFAULT}
-        style={styles.map}
-        initialRegion={region}
-        onRegionChangeComplete={setRegion}
-        showsPointsOfInterest={false}
-        showsBuildings={false}
-        showsIndoors={false}
-      >
-        {pins.map((pin) => (
-          <Marker
-            key={pin.id}
-            coordinate={{ latitude: pin.latitude, longitude: pin.longitude }}
-            onPress={() => handleMarkerPress(pin)}
-          />
-        ))}
-      </MapView>
+    <GestureHandlerRootView className="flex-1">
+      {/* Map Container */}
+      <View className="flex-1 w-full">
+        <MapView
+          ref={mapRef}
+          provider={PROVIDER_DEFAULT}
+          style={{ flex: 1 }}
+          initialRegion={region}
+          onRegionChangeComplete={setRegion}
+          showsPointsOfInterest={false}
+          showsBuildings={false}
+          showsIndoors={false}
+          customMapStyle={[
+            {
+              featureType: "poi",
+              elementType: "labels",
+              stylers: [{ visibility: "off" }],
+            },
+          ]}
+        >
+          {attractions.map((a) => (
+            <Marker
+              key={a.id}
+              coordinate={a.location}
+              onPress={() => onMarkerPress(a.id)}
+            />
+          ))}
+        </MapView>
+      </View>
 
-      {/* Bottom sheet */}
+      {/* Bottom Sheet */}
       <BottomSheet
         ref={sheetRef}
         index={-1}
         snapPoints={snapPoints}
         enablePanDownToClose
-        handleIndicatorStyle={styles.indicator}
-        onClose={handleClose}
+        enableContentPanningGesture={false}
+        enableOverDrag={false}
+        onClose={onClose}
+        backgroundStyle={{ borderRadius: 24, backgroundColor: "white" }}
+        handleIndicatorStyle={{ width: 60, height: 6, backgroundColor: "#ccc" }}
       >
-        <BottomSheetView style={styles.sheetContent}>
-          {selectedPin ? (
-            <>
-              <View style={styles.imageWrapper}>
-                <Image
-                  source={{ uri: selectedPin.imageUrl }}
-                  style={styles.image}
-                  resizeMode="cover"
-                />
+        <BottomSheetView className="flex-1 px-5">
+          {selected ? (
+            <View className="flex-1 flex-col">
+              {/* Title */}
+              <Text className="text-2xl font-bold -mt-2 mb-3">
+                {selected.name}
+              </Text>
+
+              {/* Actions */}
+              <View className="flex-row space-x-2 mb-3">
+                <Pressable
+                  className="px-3 py-3 mr-2 bg-orange-500/20 rounded-full"
+                  onPress={() =>
+                    openDirections(
+                      selected.location.latitude,
+                      selected.location.longitude
+                    )
+                  }
+                >
+                  <Text className="text-md font-medium text-orange-800">
+                    Directions
+                  </Text>
+                </Pressable>
+                <Pressable className="px-3 py-3 mr-2 bg-orange-500/20 rounded-full">
+                  <Text className="text-md font-medium text-orange-800">
+                    Save
+                  </Text>
+                </Pressable>
+                <Pressable className="px-3 py-3 mr-2 bg-orange-500/20 rounded-full">
+                  <Text className="text-md font-medium text-orange-800">
+                    Share
+                  </Text>
+                </Pressable>
+                <Pressable
+                  className="self-start px-4 py-3 bg-orange-700 rounded-full"
+                  onPress={() => {
+                    router.push({
+                        pathname: "../landmark/[lmid]",
+                        params: { lmid: selected.id },
+                    })
+                  }}
+                >
+                  <Text className="text-md font-medium text-white">
+                    More Details
+                  </Text>
+                </Pressable>
               </View>
-              <Text style={styles.title}>{selectedPin.name}</Text>
-              <Text style={styles.description}>{selectedPin.description}</Text>
-              <Pressable
-                style={styles.button}
-                onPress={() => openDirections(selectedPin.latitude, selectedPin.longitude)}
+
+              {/* Image Carousel */}
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={true}
+                className="space-x-3 mb-6"
               >
-                <Text style={styles.buttonText}>Get Directions</Text>
-              </Pressable>
-            </>
+                {selected.images_landscape.map((uri, i) => (
+                  <Image
+                    key={i}
+                    source={{ uri }}
+                    className="w-60 h-35 rounded-xl mr-2"
+                    resizeMode="cover"
+                  />
+                ))}
+              </ScrollView>
+
+              {/* Overview (fills remaining space, clipped) */}
+              <View className="flex-1 overflow-hidden">
+                <Text className="text-lg text-gray-700">
+                  {selected.overview}
+                </Text>
+              </View>
+            </View>
           ) : (
-            <Text style={styles.placeholder}>Select a pin to see info</Text>
+            <Text className="text-center text-gray-500">
+              Tap a pin to see details
+            </Text>
           )}
         </BottomSheetView>
       </BottomSheet>
     </GestureHandlerRootView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  map: { flex: 1 },
-  indicator: { backgroundColor: '#ccc', width: 40 },
-  sheetContent: { flex: 1, alignItems: 'center', padding: 16 },
-  imageWrapper: { width: '100%', height: 120, borderRadius: 8, overflow: 'hidden', marginBottom: 8 },
-  image: { width: '100%', height: '100%' },
-  title: { fontSize: 18, fontWeight: 'bold', marginBottom: 4 },
-  description: { fontSize: 14, color: '#555', textAlign: 'center', marginBottom: 12 },
-  button: { backgroundColor: '#007AFF', paddingVertical: 8, paddingHorizontal: 16, borderRadius: 6 },
-  buttonText: { color: '#fff', fontWeight: '600' },
-  placeholder: { fontSize: 14, color: '#888' },
-});
