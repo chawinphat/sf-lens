@@ -49,6 +49,19 @@ const Layout = () => {
         }}
       />
       <Tabs.Screen
+        name="Bookmark"
+        options={{
+          title: "Saved",
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? "bookmark" : "bookmark-outline"}
+              size={size}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="Profile"
         options={{
           tabBarIcon: ({ color, size, focused }) => (
