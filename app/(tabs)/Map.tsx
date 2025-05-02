@@ -9,6 +9,8 @@ import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { attractions } from "@/constants/attractions";
 import type { Attraction } from "@/common/types";
 import { useRouter } from "expo-router";
+import { useBookmarkStore } from "@/store/bookmarkStore";
+
 export default function MapScreen() {
   const router = useRouter();
   const [region, setRegion] = useState<Region>({
@@ -18,6 +20,12 @@ export default function MapScreen() {
     longitudeDelta: 0.0421,
   });
   const [selected, setSelected] = useState<Attraction | null>(null);
+
+  // Bookmark state & toggle
+  const has = useBookmarkStore((s) =>
+    selected ? s.hasBookmark(selected.id) : false
+  );
+  const toggle = useBookmarkStore((s) => s.toggle);
 
   const sheetRef = useRef<BottomSheet>(null);
   const mapRef = useRef<MapView>(null);
@@ -29,7 +37,8 @@ export default function MapScreen() {
     Linking.openURL(url);
   }, []);
 
-  const onMarkerPress = useCallback((id: string) => {
+  const onMarkerPress = useCallback(
+    (id: string) => {
       const item = attractions.find((a) => a.id === id) || null;
       if (!item) return;
 
@@ -96,11 +105,11 @@ export default function MapScreen() {
         backgroundStyle={{ borderRadius: 24, backgroundColor: "white" }}
         handleIndicatorStyle={{ width: 60, height: 6, backgroundColor: "#ccc" }}
       >
-        <BottomSheetView className="flex-1 px-5">
+        <BottomSheetView className="flex-1 pt-2 px-5">
           {selected ? (
             <View className="flex-1 flex-col">
               {/* Title */}
-              <Text className="text-2xl font-bold -mt-2 mb-3">
+              <Text className="text-3xl -mt-2 mb-3">
                 {selected.name}
               </Text>
 
@@ -119,9 +128,12 @@ export default function MapScreen() {
                     Directions
                   </Text>
                 </Pressable>
-                <Pressable className="px-3 py-3 mr-2 bg-orange-500/20 rounded-full">
+                <Pressable
+                  className="px-3 py-3 mr-2 bg-orange-500/20 rounded-full"
+                  onPress={() => selected && toggle(selected.id)}
+                >
                   <Text className="text-md font-medium text-orange-800">
-                    Save
+                    {has ? "Saved" : "Save"}
                   </Text>
                 </Pressable>
                 <Pressable className="px-3 py-3 mr-2 bg-orange-500/20 rounded-full">
@@ -133,9 +145,9 @@ export default function MapScreen() {
                   className="self-start px-4 py-3 bg-orange-700 rounded-full"
                   onPress={() => {
                     router.push({
-                        pathname: "../landmark/[lmid]",
-                        params: { lmid: selected.id },
-                    })
+                      pathname: "../landmark/[lmid]",
+                      params: { lmid: selected.id },
+                    });
                   }}
                 >
                   <Text className="text-md font-medium text-white">
@@ -162,7 +174,7 @@ export default function MapScreen() {
 
               {/* Overview (fills remaining space, clipped) */}
               <View className="flex-1 overflow-hidden">
-                <Text className="text-lg text-gray-700">
+                <Text className="text-lg text-gray-700" numberOfLines={10} ellipsizeMode="tail">
                   {selected.overview}
                 </Text>
               </View>
