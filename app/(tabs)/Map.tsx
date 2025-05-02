@@ -2,7 +2,15 @@
 // A React Native map screen using @gorhom/bottom-sheet, sourcing pins from constants/attractions, styled with nativewind like Home.
 
 import React, { useRef, useState, useCallback, useMemo } from "react";
-import { View, Text, Image, Pressable, ScrollView, Linking } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  Pressable,
+  ScrollView,
+  Linking,
+  FlatList,
+} from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import MapView, { Marker, PROVIDER_DEFAULT, Region } from "react-native-maps";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
@@ -10,6 +18,7 @@ import { attractions } from "@/constants/attractions";
 import type { Attraction } from "@/common/types";
 import { useRouter } from "expo-router";
 import { useBookmarkStore } from "@/store/bookmarkStore";
+import SearchBar from "@/components/SearchBar";
 
 export default function MapScreen() {
   const router = useRouter();
@@ -26,6 +35,18 @@ export default function MapScreen() {
     selected ? s.hasBookmark(selected.id) : false
   );
   const toggle = useBookmarkStore((s) => s.toggle);
+
+  // Search state
+  const [query, setQuery] = useState<string>("");
+  const filtered = useMemo(
+    () =>
+      query.trim() === ""
+        ? []
+        : attractions.filter((a) =>
+            a.name.toLowerCase().includes(query.toLowerCase())
+          ),
+    [query]
+  );
 
   const sheetRef = useRef<BottomSheet>(null);
   const mapRef = useRef<MapView>(null);
@@ -57,6 +78,14 @@ export default function MapScreen() {
     [region]
   );
 
+  const selectAttraction = useCallback(
+    (item: Attraction) => {
+      onMarkerPress(item.id);
+      setQuery("");
+    },
+    [onMarkerPress]
+  );
+
   const onClose = useCallback(() => {
     sheetRef.current?.close();
     setSelected(null);
@@ -66,6 +95,31 @@ export default function MapScreen() {
     <GestureHandlerRootView className="flex-1">
       {/* Map Container */}
       <View className="flex-1 w-full">
+        {/* Search Bar */}
+        <View className="absolute top-20 w-full px-4 z-10">
+          <SearchBar
+            searchBarPlaceHolder="Search attractions..."
+            searchByNameCode={setQuery}
+          />
+          {filtered.length > 0 && (
+            <View className="bg-white rounded-b-xl overflow-hidden shadow">
+              <FlatList
+                data={filtered}
+                keyExtractor={(item) => item.id}
+                style={{ maxHeight: 200 }}
+                renderItem={({ item }) => (
+                  <Pressable
+                    className="px-4 py-3 border-b border-gray-200"
+                    onPress={() => selectAttraction(item)}
+                  >
+                    <Text className="text-base">{item.name}</Text>
+                  </Pressable>
+                )}
+              />
+            </View>
+          )}
+        </View>
+
         <MapView
           ref={mapRef}
           provider={PROVIDER_DEFAULT}
@@ -87,8 +141,13 @@ export default function MapScreen() {
             <Marker
               key={a.id}
               coordinate={a.location}
-              onPress={() => onMarkerPress(a.id)}
-            />
+              onPress={() => onMarkerPress(a.id)}>
+              <View className="items-center">
+                <Image
+                  source={{ uri: a.images_landscape[0] }}
+                  style={{ width: 40, height: 40, borderRadius: 20, borderWidth: 2, borderColor: "#fff" }}  /> 
+              </View>
+            </Marker>
           ))}
         </MapView>
       </View>
@@ -105,11 +164,11 @@ export default function MapScreen() {
         backgroundStyle={{ borderRadius: 24, backgroundColor: "white" }}
         handleIndicatorStyle={{ width: 60, height: 6, backgroundColor: "#ccc" }}
       >
-        <BottomSheetView className="flex-1 pt-2 px-5">
+        <BottomSheetView className="flex-1 pt-1 px-5">
           {selected ? (
             <View className="flex-1 flex-col">
               {/* Title */}
-              <Text className="text-3xl -mt-2 mb-3">
+              <Text className="text-2xl font-bold -mt-2 mb-3">
                 {selected.name}
               </Text>
 
@@ -174,7 +233,11 @@ export default function MapScreen() {
 
               {/* Overview (fills remaining space, clipped) */}
               <View className="flex-1 overflow-hidden">
-                <Text className="text-lg text-gray-700" numberOfLines={10} ellipsizeMode="tail">
+                <Text
+                  className="text-lg text-gray-700"
+                  numberOfLines={10}
+                  ellipsizeMode="tail"
+                >
                   {selected.overview}
                 </Text>
               </View>
