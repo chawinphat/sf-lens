@@ -26,7 +26,14 @@ export type Category =
   | "Building"
   | "Museums"
   | "Neighborhoods"
+  | "Food"
   | "Views"
+  | "Science"
+  | "Shopping"
+  | "Education"
+  | "Family"
+  | "Recreation"
+  | "Transportation"
   | "Parks"; // can be extended
 
 export interface Attraction {
