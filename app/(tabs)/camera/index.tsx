@@ -1,4 +1,5 @@
 import { CameraType, CameraView, useCameraPermissions } from "expo-camera";
+import { Modal, ActivityIndicator, Alert } from "react-native";
 import { useEffect, useRef, useState } from "react";
 import {
   Button,
@@ -9,17 +10,21 @@ import {
   Text,
   View,
 } from "react-native";
+import * as FileSystem from "expo-file-system";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
+import { NOGGIN_KEY } from '@/secret.js';
 
 export default function Camera() {
   const router = useRouter();
   const [permission, requestPermission] = useCameraPermissions();
   const ref = useRef<CameraView>(null);
   const [uri, setUri] = useState<string | null>(null);
+  const [dataUrl, setDataUrl] = useState<string | null>(null);
   const [facing, setFacing] = useState<CameraType>("back");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     if (!permission) return;
@@ -31,11 +36,12 @@ export default function Camera() {
 
   const takePicture = async () => {
     try {
-      const photo = await ref.current?.takePictureAsync();
+      const photo = await ref.current?.takePictureAsync({ quality: 0.9, base64: true });
       if (!photo) {
         return;
       }
-      setUri(photo?.uri);
+      setUri(photo.uri);
+      setDataUrl(`data:image/jpeg;base64,${photo.base64}`);
     } catch (error) {
       console.log(error);
     }
@@ -45,8 +51,13 @@ export default function Camera() {
     const res = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.9,
+      base64: true,
     });
-    if (!res.canceled) setUri(res.assets[0].uri);
+    if (!res.canceled) {
+      const asset = res.assets[0];
+      setUri(asset.uri);
+      setDataUrl(`data:image/jpeg;base64,${asset.base64}`);
+    }
   };
 
   const toggleFacing = () => {
@@ -56,8 +67,57 @@ export default function Camera() {
   /* ---------- confirm picture ---------- */
   // add identification logic here
   // can add a result page, or just navigate to the a landmark page directly based on the result
-  const confirm = () =>
-    router.push({ pathname: "./result", params: { uri: uri! } });
+  const confirm = async () => {
+    setIsLoading(true);
+    if (!dataUrl) {
+      console.warn("No image data to send.");
+      return;
+    }
+    try {
+      const responseText = await fetch(
+        'https://noggin.rea.gent/developed-tarantula-3172',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${NOGGIN_KEY}`,
+          },
+          body: JSON.stringify({
+            // fill variables here.
+            // You can use an external URL or a data URL here.
+            "var1": dataUrl,
+          }),
+        }
+      ).then(response => response.text());
+      const attraction = JSON.parse(responseText);
+      if (attraction.attraction_id === "none-found") {
+        setIsLoading(false);
+        Alert.alert(
+          "No attraction found",
+          "Sorry, we couldn't find any attraction like this in San Francisco. Please try again.",
+          [
+            {
+              text: "OK",
+              onPress: () => {
+                setUri(null);
+                setDataUrl(null);
+              }
+            }
+          ]
+        );
+        return;
+      }
+      setIsLoading(false);
+      router.push({
+                pathname: "../landmark/[lmid]",
+                params: { lmid: attraction.attraction_id },
+              });
+    } catch (error) {
+      setIsLoading(false);
+      console.error("Error calling LLM:", error);
+    }
+  };
+
 
   if (!permission) return null;
 
@@ -76,6 +136,18 @@ export default function Camera() {
   if (uri) {
     return (
       <SafeAreaView className="flex-1 bg-white">
+        {isLoading && (
+          <Modal transparent visible={isLoading}>
+            <View style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "rgba(0, 0, 0, 0.5)"
+            }}>
+              <ActivityIndicator size="large" color="#fff" />
+            </View>
+          </Modal>
+        )}
         <Image
           source={{ uri: uri }}
           className="flex-1 block object-contain"
@@ -83,7 +155,13 @@ export default function Camera() {
         />
         <View className="absolute bottom-8 inset-x-0 flex-row justify-evenly">
           <Pressable
-            onPress={() => setUri(null)}
+            onPress={
+              () => {
+                setUri(null)
+                setDataUrl(null)
+              }
+
+            }
             className="rounded-full bg-white/80 px-8 py-3"
           >
             <Text className="font-semibold">Retake</Text>
@@ -102,6 +180,18 @@ export default function Camera() {
   /* ---------- camera ---------- */
   return (
     <SafeAreaView className="flex-1 bg-black">
+      {isLoading && (
+        <Modal transparent visible={isLoading}>
+          <View style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "rgba(0, 0, 0, 0.5)"
+          }}>
+            <ActivityIndicator size="large" color="#fff" />
+          </View>
+        </Modal>
+      )}
       <CameraView
         ref={ref}
         style={styles.camera}

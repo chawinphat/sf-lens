@@ -411,35 +411,6 @@ Located within Golden Gate Park, the Japanese Tea Garden is the oldest public Ja
 },
 
 {
-  id: "uc-berkeley",
-  name: "University of California, Berkeley",
-  overview: `
-Founded in 1868, UC Berkeley is one of the world’s leading public research universities. Located just across the Bay from San Francisco, the campus is known for its historic architecture, activism, and academic excellence. Sather Tower (the Campanile), Doe Library, and Sproul Plaza are some of its most iconic landmarks.
-  `.trim(),
-  location: gp(37.8719, -122.2585),
-  images_landscape: [
-    "https://images.unsplash.com/photo-1694391505705-7fde96f6f14f?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    "https://images.unsplash.com/photo-1638909374755-a4f79efb5514?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  ],
-  images_portrait: "https://images.unsplash.com/photo-1638909374755-a4f79efb5514?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  special: "Climb the Campanile for panoramic views, or take a guided campus tour.",
-  tags: ["Education", "Culture", "History"],
-},
-{
-  id: "berkeley-rose-garden",
-  name: "Berkeley Rose Garden",
-  overview: `
-Nestled in the Berkeley Hills, the Berkeley Rose Garden is a beautifully terraced amphitheater featuring over 250 varieties of roses. Built in 1937 as a WPA project, the garden offers stunning views of the San Francisco Bay and Golden Gate Bridge, especially during peak bloom in late spring and early summer.
-  `.trim(),
-  location: gp(37.8793, -122.2669),
-  images_landscape: [
-    "https://www.visitberkeley.com/imager/files_idss_com/C199/b68e759d-c32f-4197-ba37-6400b686f066_930104bc5592b0f48aa7a928055610d9.jpg",
-  ],
-  images_portrait: "https://www.visitberkeley.com/imager/files_idss_com/C199/b68e759d-c32f-4197-ba37-6400b686f066_930104bc5592b0f48aa7a928055610d9.jpg",
-  special: "Free to the public year-round; peak bloom is typically May to June.",
-  tags: ["Parks", "Views"],
-},
-{
   id: "sfo-airport",
   name: "San Francisco International Airport (SFO)",
   overview: `
@@ -455,21 +426,6 @@ SFO is one of the busiest airports on the West Coast, serving as a major interna
   tags: ["Transportation"],
 },
 {
-  id: "stanford-university",
-  name: "Stanford University",
-  overview: `
-Located in the heart of Silicon Valley, Stanford University is a world-renowned private research institution known for its innovation, palm-lined boulevards, and Romanesque architecture. Founded in 1885, the campus spans over 8,000 acres and features landmarks such as the Main Quad, Hoover Tower, and the Rodin Sculpture Garden.
-  `.trim(),
-  location: gp(37.4275, -122.1697),
-  images_landscape: [
-    "https://images.unsplash.com/photo-1508302882073-8af6be4c6688?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    "https://images.unsplash.com/photo-1633641642745-02fa620538be?q=80&w=1964&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  ],
-  images_portrait: "https://images.unsplash.com/photo-1508302882073-8af6be4c6688?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  special: "Free campus walking tours available daily; don't miss the view from Hoover Tower on a clear day.",
-  tags: ["Education", "History"],
-},
-{
   id: "union-square",
   name: "Union Square",
   overview: `
@@ -483,20 +439,6 @@ Union Square is the vibrant commercial and cultural heart of San Francisco, surr
   images_portrait: "https://images.unsplash.com/photo-1576764894677-aac83a1d285e?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   special: "Visit during the holidays for giant Christmas trees and open-air skating. Powell Street cable car turnaround is nearby.",
   tags: ["Shopping", "Culture", "Parks"],
-},
-{
-  id: "the-big-c",
-  name: "The Big C",
-  overview: `
-Painted on the Berkeley Hills above UC Berkeley, The Big C is a giant yellow concrete letter “C” that symbolizes school spirit and long-standing traditions. Installed in 1905 by the classes of 1907 and 1908, it’s a short uphill hike that rewards visitors with panoramic views of the campus, San Francisco Bay, and beyond.
-  `.trim(),
-  location: gp(37.8755, -122.2532),
-  images_landscape: [
-    "https://upload.wikimedia.org/wikipedia/commons/5/59/Big_C_Berkeley_Hills.jpg",
-  ],
-  images_portrait: "https://upload.wikimedia.org/wikipedia/commons/5/59/Big_C_Berkeley_Hills.jpg",
-  special: "Quick hike from the UC Berkeley campus via the fire trails; sunset views are especially stunning.",
-  tags: ["Views"],
 },
 
 ];
