@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
+import { Alert } from 'react-native';
 import {
   auth,
   createUserWithEmailAndPassword as _register,
@@ -14,6 +15,22 @@ export const AuthContext = createContext();
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const clearError = () => setError(null);
+
+  useEffect(() => {
+    if (error) {
+      Alert.alert(
+        "Please try again...",
+        error,
+        [
+          { text: "OK" }
+        ],
+        { cancelable: false }
+      );
+    }
+  }, [error]);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, u => {
@@ -37,15 +54,40 @@ export function AuthProvider({ children }) {
     }
   };
   
-  const login    = (email, password) => _login(auth, email, password);
-  const logout   = () => _logout(auth);
+  const login = async (email, password) => {
+    try {
+      return await _login(auth, email, password);
+    } catch (error) {
+      let friendlyMessage;
+      switch (error.code) {
+        case 'auth/invalid-credential':
+        case 'auth/wrong-password':
+        case 'auth/user-not-found':
+          friendlyMessage = 'The email and password you entered is incorrect. Please double-check and try again.';
+          break;
+        case 'auth/invalid-email':
+          friendlyMessage = 'Please enter a valid email address.';
+          break;
+        case 'auth/user-disabled':
+          friendlyMessage = 'This account has been disabled. Please contact support.';
+          break;
+        default:
+          friendlyMessage = 'An unexpected error occurred. Please try again later.';
+      }
+      setError(friendlyMessage);
+      throw error;
+    }
+  };
+
+  const logout = () => _logout(auth);
+
   const continueAsGuest = async () => {
-  const userCredential = await _anon(auth);
+    const userCredential = await _anon(auth);
     return userCredential;
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, register, login, logout, continueAsGuest }}>
+    <AuthContext.Provider value={{ user, loading, register, login, error, clearError, logout, continueAsGuest }}>
       {children}
     </AuthContext.Provider>
   );

@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 
 const Login = () => {
@@ -26,12 +27,31 @@ const Login = () => {
 
   useFocusEffect( // clear error when the screen got reopen
     useCallback(() => {
-      clearError?.();
+      clearError();
     }, [])
   );
 
+  useEffect(() => {
+    if (error) {
+      setEmail("");
+      setPassword("");
+    }
+  }, [error]);
+
   const onLogin = () => {
-    if (!email || !password) return;
+    if (!email || !password) {
+      Alert.alert(
+              "Please try again...",
+              "Atleast one of the required fields is empty, please check again.",
+              [
+                { text: "OK" }
+              ],
+              { cancelable: false }
+            );
+      
+      return;
+    }
+    clearError();
     login(email, password);
   };
 
@@ -54,7 +74,7 @@ const Login = () => {
         {/* email/phone input */}
         <View>
           <Text className="mb-1 text-gray-700 font-medium text-sm">
-            Email / Phone Number
+            Email
           </Text>
           <TextInput
             placeholder="example@email.com"
@@ -63,7 +83,6 @@ const Login = () => {
             value={email}
             onChangeText={(text) => {
               setEmail(text);
-              if (error) clearError?.();
             }}
             className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm bg-gray-50 focus:border-black text-black"
           />
@@ -81,7 +100,6 @@ const Login = () => {
             value={password}
             onChangeText={(text) => {
               setPassword(text);
-              if (error) clearError?.();
             }}
             className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm bg-gray-50 focus:border-black text-black"
           />
