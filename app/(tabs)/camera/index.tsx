@@ -9,6 +9,7 @@ import {
   Text,
   View,
 } from "react-native";
+import * as FileSystem from "expo-file-system";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import * as ImagePicker from "expo-image-picker";
@@ -19,6 +20,7 @@ export default function Camera() {
   const [permission, requestPermission] = useCameraPermissions();
   const ref = useRef<CameraView>(null);
   const [uri, setUri] = useState<string | null>(null);
+  const [dataUrl, setDataUrl] = useState<string | null>(null);
   const [facing, setFacing] = useState<CameraType>("back");
 
   useEffect(() => {
@@ -31,11 +33,12 @@ export default function Camera() {
 
   const takePicture = async () => {
     try {
-      const photo = await ref.current?.takePictureAsync();
+      const photo = await ref.current?.takePictureAsync({ quality: 0.9, base64: true });
       if (!photo) {
         return;
       }
-      setUri(photo?.uri);
+      setUri(photo.uri);
+      setDataUrl(`data:image/jpeg;base64,${photo.base64}`);
     } catch (error) {
       console.log(error);
     }
@@ -45,8 +48,13 @@ export default function Camera() {
     const res = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.9,
+      base64: true,
     });
-    if (!res.canceled) setUri(res.assets[0].uri);
+    if (!res.canceled) {
+      const asset = res.assets[0];
+      setUri(asset.uri);
+      setDataUrl(`data:image/jpeg;base64,${asset.base64}`);
+    }
   };
 
   const toggleFacing = () => {
@@ -56,8 +64,37 @@ export default function Camera() {
   /* ---------- confirm picture ---------- */
   // add identification logic here
   // can add a result page, or just navigate to the a landmark page directly based on the result
-  const confirm = () =>
-    router.push({ pathname: "./result", params: { uri: uri! } });
+  const confirm = async () => {
+    if (!dataUrl) {
+      console.warn("No image data to send.");
+      return;
+    }
+    try {
+      const responseText = await fetch(
+        'https://noggin.rea.gent/developed-tarantula-3172',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer X',
+          },
+          body: JSON.stringify({
+            // fill variables here.
+            // You can use an external URL or a data URL here.
+            "var1": dataUrl,
+          }),
+        }
+      ).then(response => response.text());
+      const attraction = JSON.parse(responseText);
+      router.push({
+                pathname: "../landmark/[lmid]",
+                params: { lmid: attraction.attraction_id },
+              });
+    } catch (error) {
+      console.error("Error calling LLM:", error);
+    }
+  };
+
 
   if (!permission) return null;
 
