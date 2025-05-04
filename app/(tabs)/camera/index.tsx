@@ -14,6 +14,7 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
+import { NOGGIN_KEY } from '@/secret.js';
 
 export default function Camera() {
   const router = useRouter();
@@ -76,7 +77,7 @@ export default function Camera() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: 'Bearer X',
+            Authorization: `Bearer ${NOGGIN_KEY}`,
           },
           body: JSON.stringify({
             // fill variables here.
