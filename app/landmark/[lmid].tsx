@@ -14,6 +14,7 @@ import { Feather, Ionicons } from "@expo/vector-icons";
 import { Attraction, Review, User, LatLng } from "@/common/types";
 import ReviewItem from "@/components/ReviewItem";
 import { NativeSyntheticEvent } from "react-native";
+import { attractions } from "@/constants/attractions";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -34,44 +35,14 @@ export function TabContent({ text }: { text: string }) {
 export default function LandmarkDetail() {
   const router = useRouter();
   const { lmid } = useLocalSearchParams<{ lmid: string }>();
-
-  // dummy attraction
-  const loc: LatLng = {
-    latitude: 37.7749,
-    longitude: -122.4194,
-  };
-  const attraction: Attraction = {
-    id: lmid,
-    name: lmid,
-    overview: `
-    Tucked away from the bustling main streets, this hidden gem remains one of the city's best-kept secrets, waiting patiently for curious explorers to uncover its charm. Stepping into this landmark feels like crossing a threshold into another time, where stories from generations past linger gracefully within its carefully preserved walls.
-
-Visitors who discover this enchanting place are immediately captivated by its intricate architecture, blending ornate details with quiet elegance, whispering tales of the visionary artists and craftsmen who shaped its design. Each archway, carved facade, and stained-glass window is thoughtfully positioned, inviting your eyes to wander and your imagination to roam freely.
-
-Beyond its physical beauty, the landmark carries a fascinating story. Originally built by a visionary architect who dreamed of creating an oasis of culture and beauty, it once served as a gathering place for artists, thinkers, and dreamers who shaped the city's creative heritage. Today, while maintaining its historical authenticity, the space continues to inspire visitors—inviting them to pause, reflect, and appreciate moments of serene beauty amidst urban life.
-
-Come explore this quiet sanctuary where history, beauty, and imagination merge into an unforgettable experience. Here, you won't find large crowds or hurried tourists—only the timeless charm and captivating stories of a hidden treasure that's waiting patiently for you to discover it.
-    `.trim(),
-    location: loc,
-    images:
-      lmid === "Transamerica Pyramid"
-        ? [
-            "https://images.unsplash.com/photo-1487186431619-869dc62557b6?q=80&w=2712&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-            "https://images.unsplash.com/photo-1730993688407-38b8663208b7?q=80&w=2652&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-          ]
-        : lmid === "Golden Gate Bridge"
-        ? [
-            "https://images.unsplash.com/photo-1719858403364-83f7442a197e?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-            "https://images.unsplash.com/photo-1675186253735-c1240f66dbc8?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-          ]
-        : [
-            "https://images.unsplash.com/photo-1586796140676-ae3945168a97?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-            "https://images.unsplash.com/photo-1540492102407-ef9c87892184?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-          ],
-    special:
-      "Pedestrian walkways open daily from 5 AM to 6 PM. Don't miss the spectacular sunset view!",
-    tags: "Building",
-  };
+  const attraction = attractions.find((item) => item.id === lmid) as Attraction;
+  if (!attraction) {
+    return (
+      <SafeAreaView className="flex-1 items-center justify-center">
+        <Text className="text-lg font-semibold">Attraction not found</Text>
+      </SafeAreaView>
+    );
+  }
 
   const dummyUsers: Record<string, User> = {
     user1: {
@@ -156,7 +127,7 @@ Come explore this quiet sanctuary where history, beauty, and imagination merge i
           }}
           scrollEventThrottle={16}
         >
-          {attraction.images.map((uri, i) => (
+          {attraction.images_landscape.map((uri, i) => (
             <Image
               key={i}
               source={{ uri }}
@@ -167,7 +138,7 @@ Come explore this quiet sanctuary where history, beauty, and imagination merge i
         </ScrollView>
         <View className="absolute bottom-3 left-4 bg-black bg-opacity-50 px-2 py-1 rounded-md">
           <Text className="text-white text-sm">
-            {index + 1}/{attraction.images.length}
+            {index + 1}/{attraction.images_landscape.length}
           </Text>
         </View>
       </View>
