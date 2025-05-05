@@ -80,7 +80,7 @@ export default function Camera() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${NOGGIN_KEY}`,
+            Authorization: `Bearer rg_v1_kv7x5yxjeit90nw8t79z0lmh7bopajh3qvn4_ngk`,
           },
           body: JSON.stringify({
             // fill variables here.
