@@ -20,17 +20,11 @@ const SplashScreen = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Redirect to the landing screen after loading
-  // if (!loading) {
-  //   if (user) {
-  //     return <Redirect href="/(tabs)/Home" />;
-  //   }
-  //   else {
-  //   return <Redirect href="../(auth)/LandingScreen" />;
-  //   }
-
-  // }
-
+  
+  if (user) {
+      return <Redirect href="/(tabs)/Home" />;
+    }
+    
   return (
     <View className="flex-1 flex flex-col justify-center items-center bg-white">
       <MotiView

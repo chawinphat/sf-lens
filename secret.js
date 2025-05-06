@@ -1,0 +1,1 @@
+export const NOGGIN_KEY = 'rg_v1_kv7x5yxjeit90nw8t79z0lmh7bopajh3qvn4_ngk';
