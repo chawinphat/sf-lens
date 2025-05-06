@@ -54,10 +54,8 @@ export default function MapScreen() {
 
   const snapPoints = ["50%"];
 
-  const openDirections = useCallback((lat: number, lng: number) => {
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
-    Linking.openURL(url);
-  }, []);
+  const openDirections = useCallback((lat: number, lng: number) => Linking.openURL(`https://www.google.com/maps/dir/?api=1&origin=37.7749,-122.4194&destination=${lat},${lng}`), []);
+
 
   const onMarkerPress = useCallback(
     (id: string) => {
