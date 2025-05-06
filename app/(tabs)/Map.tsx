@@ -12,7 +12,7 @@ import {
   FlatList,
 } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import MapView, { Marker, PROVIDER_DEFAULT, Region } from "react-native-maps";
+import MapView, { Marker, PROVIDER_DEFAULT, Region, Circle } from "react-native-maps";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { attractions } from "@/constants/attractions";
 import type { Attraction } from "@/common/types";
@@ -138,6 +138,13 @@ export default function MapScreen() {
             },
           ]}
         >
+          <Circle center={{ latitude: 37.7749, longitude: -122.4194 }}  radius={100} fillColor="rgba(0,122,255,0.15)"  strokeColor="rgba(0,122,255,0.4)" strokeWidth={1} />
+          <Marker
+            coordinate={{ latitude: 37.7749, longitude: -122.4194 }}
+            pinColor="blue"
+          >
+            <MaterialIcons name="my-location" size={24} color="#007AFF" />
+          </Marker>
           {attractions.map((a) => (
             <Marker
               key={a.id}
