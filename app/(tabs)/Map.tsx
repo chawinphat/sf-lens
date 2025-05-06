@@ -1,6 +1,3 @@
-// MapScreen.tsx
-// A React Native map screen using @gorhom/bottom-sheet, sourcing pins from constants/attractions, styled with nativewind like Home.
-
 import React, { useRef, useState, useCallback, useMemo } from "react";
 import {
   View,
@@ -20,6 +17,7 @@ import { useRouter } from "expo-router";
 import { useBookmarkStore } from "@/store/bookmarkStore";
 import SearchBar from "@/components/SearchBar";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useUserLocation } from "@/hooks/useUserLocation"
 
 export default function MapScreen() {
   const router = useRouter();
@@ -31,6 +29,7 @@ export default function MapScreen() {
   });
   const [selected, setSelected] = useState<Attraction | null>(null);
 
+  const userLoc = useUserLocation();
   // Bookmark state & toggle
   const has = useBookmarkStore((s) =>
     selected ? s.hasBookmark(selected.id) : false
@@ -136,9 +135,9 @@ export default function MapScreen() {
             },
           ]}
         >
-          <Circle center={{ latitude: 37.7749, longitude: -122.4194 }}  radius={100} fillColor="rgba(0,122,255,0.15)"  strokeColor="rgba(0,122,255,0.4)" strokeWidth={1} />
+          <Circle center={{ latitude: userLoc.latitude, longitude: userLoc.longitude }}  radius={100} fillColor="rgba(0,122,255,0.15)"  strokeColor="rgba(0,122,255,0.4)" strokeWidth={1} />
           <Marker
-            coordinate={{ latitude: 37.7749, longitude: -122.4194 }}
+            coordinate={{ latitude: userLoc.latitude, longitude: userLoc.longitude  }}
             pinColor="blue"
           >
             <MaterialIcons name="my-location" size={24} color="#007AFF" />
