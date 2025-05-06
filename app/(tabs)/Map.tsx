@@ -19,6 +19,7 @@ import type { Attraction } from "@/common/types";
 import { useRouter } from "expo-router";
 import { useBookmarkStore } from "@/store/bookmarkStore";
 import SearchBar from "@/components/SearchBar";
+import { MaterialIcons } from "@expo/vector-icons";
 
 export default function MapScreen() {
   const router = useRouter();
@@ -175,7 +176,7 @@ export default function MapScreen() {
               {/* Actions */}
               <View className="flex-row space-x-2 mb-3">
                 <Pressable
-                  className="px-3 py-3 mr-2 bg-orange-500/20 rounded-full"
+                  className="flex-row items-center px-3 py-3 mr-2 bg-orange-500/20 rounded-full"
                   onPress={() =>
                     openDirections(
                       selected.location.latitude,
@@ -183,19 +184,24 @@ export default function MapScreen() {
                     )
                   }
                 >
+                  <MaterialIcons name="directions" size={20} color="#C2410C" />
                   <Text className="text-md font-medium text-orange-800">
                     Directions
                   </Text>
                 </Pressable>
                 <Pressable
-                  className="px-3 py-3 mr-2 bg-orange-500/20 rounded-full"
+                  className="flex-row items-center px-3 py-3 mr-2 bg-orange-500/20 rounded-full"
                   onPress={() => selected && toggle(selected.id)}
                 >
+                  <MaterialIcons name={has ? "bookmark" : "bookmark-border"} size={20} color="#C2410C" />
+
                   <Text className="text-md font-medium text-orange-800">
                     {has ? "Saved" : "Save"}
                   </Text>
                 </Pressable>
-                <Pressable className="px-3 py-3 mr-2 bg-orange-500/20 rounded-full">
+                <Pressable className="flex-row items-center px-3 py-3 mr-2 bg-orange-500/20 rounded-full">
+
+                  <MaterialIcons name="share" size={20} color="#C2410C" />
                   <Text className="text-md font-medium text-orange-800">
                     Share
                   </Text>
