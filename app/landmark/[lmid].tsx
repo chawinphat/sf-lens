@@ -253,7 +253,7 @@ export default function LandmarkDetail() {
                   avatarUrl: review.userAvatarUrl || "https://avatar.iran.liara.run/public",
                   savedAttractionIds: [],   // required by User type
                 }}
-                currentUserId={user.uid}
+                currentUserId={user?.uid || ""}
               />
             ))}
         </View>
