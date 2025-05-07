@@ -15,7 +15,7 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
-import { NOGGIN_KEY } from '@/secret.js';
+import { NOGGIN_KEY } from "@/secret.js";
 
 export default function Camera() {
   const router = useRouter();
@@ -36,7 +36,10 @@ export default function Camera() {
 
   const takePicture = async () => {
     try {
-      const photo = await ref.current?.takePictureAsync({ quality: 0.9, base64: true });
+      const photo = await ref.current?.takePictureAsync({
+        quality: 0.9,
+        base64: true,
+      });
       if (!photo) {
         return;
       }
@@ -75,20 +78,20 @@ export default function Camera() {
     }
     try {
       const responseText = await fetch(
-        'https://noggin.rea.gent/developed-tarantula-3172',
+        "https://noggin.rea.gent/developed-tarantula-3172",
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
             Authorization: `Bearer rg_v1_kv7x5yxjeit90nw8t79z0lmh7bopajh3qvn4_ngk`,
           },
           body: JSON.stringify({
             // fill variables here.
             // You can use an external URL or a data URL here.
-            "var1": dataUrl,
+            var1: dataUrl,
           }),
         }
-      ).then(response => response.text());
+      ).then((response) => response.text());
       const attraction = JSON.parse(responseText);
       if (attraction.attraction_id === "none-found") {
         setIsLoading(false);
@@ -101,23 +104,22 @@ export default function Camera() {
               onPress: () => {
                 setUri(null);
                 setDataUrl(null);
-              }
-            }
+              },
+            },
           ]
         );
         return;
       }
       setIsLoading(false);
       router.push({
-                pathname: "../landmark/[lmid]",
-                params: { lmid: attraction.attraction_id },
-              });
+        pathname: "../landmark/[lmid]",
+        params: { lmid: attraction.attraction_id },
+      });
     } catch (error) {
       setIsLoading(false);
       console.error("Error calling LLM:", error);
     }
   };
-
 
   if (!permission) return null;
 
@@ -138,12 +140,14 @@ export default function Camera() {
       <SafeAreaView className="flex-1 bg-white">
         {isLoading && (
           <Modal transparent visible={isLoading}>
-            <View style={{
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: "rgba(0, 0, 0, 0.5)"
-            }}>
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: "rgba(0, 0, 0, 0.5)",
+              }}
+            >
               <ActivityIndicator size="large" color="#fff" />
             </View>
           </Modal>
@@ -155,20 +159,17 @@ export default function Camera() {
         />
         <View className="absolute bottom-8 inset-x-0 flex-row justify-evenly">
           <Pressable
-            onPress={
-              () => {
-                setUri(null)
-                setDataUrl(null)
-              }
-
-            }
+            onPress={() => {
+              setUri(null);
+              setDataUrl(null);
+            }}
             className="rounded-full bg-white/80 px-8 py-3"
           >
             <Text className="font-semibold">Retake</Text>
           </Pressable>
           <Pressable
             onPress={confirm}
-            className="rounded-full bg-amber-500 px-8 py-3"
+            className="rounded-full bg-[#FC622C] px-8 py-3"
           >
             <Text className="font-semibold text-white">Confirm</Text>
           </Pressable>
@@ -182,12 +183,14 @@ export default function Camera() {
     <SafeAreaView className="flex-1 bg-black">
       {isLoading && (
         <Modal transparent visible={isLoading}>
-          <View style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "rgba(0, 0, 0, 0.5)"
-          }}>
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+            }}
+          >
             <ActivityIndicator size="large" color="#fff" />
           </View>
         </Modal>

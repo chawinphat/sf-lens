@@ -7,7 +7,7 @@ const Layout = () => {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#F59E0B",
+        tabBarActiveTintColor: "#FC622C",
         tabBarInactiveTintColor: "#6B7280",
       }}
     >

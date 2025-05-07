@@ -19,7 +19,6 @@ const Layout = () => {
         name="Register"
         options={{ headerTitle: "Register", headerBackTitle: "Back" }}
       />
-
     </Stack>
   );
 };
