@@ -33,8 +33,8 @@ const Profile = () => {
       <View className="items-center mt-10">
         <Image
           source={{
-            // uri: user?.photoURL || "https://avatar.iran.liara.run/public", // TODO: fix
-            uri: "https://avatar.iran.liara.run/public",
+            uri: user?.photoURL || "https://avatar.iran.liara.run/public"
+           
           }}
           className="w-24 h-24 rounded-full border-2 border-gray-300"
         />

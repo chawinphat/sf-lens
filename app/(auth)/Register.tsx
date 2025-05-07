@@ -14,7 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../authentication/AuthContext";
 
 const Register = () => {
-  const { register, user, loading, updateProfile } = useAuth();
+  const { register, user, loading } = useAuth();
   const router = useRouter();
 
   const [username, setUsername] = useState("");
@@ -155,15 +155,24 @@ const Register = () => {
         </View>
 
         {/* submit button */}
-        <TouchableOpacity
-          onPress={handleRegister}
-          className={`py-3 rounded-xl items-center mb-6 ${
-            passwordsMatch && passwordStrong ? "bg-black" : "bg-gray-300"
-          }`}
-          disabled={!passwordsMatch || !passwordStrong}
-        >
-          <Text className="text-white text-base font-semibold">Register</Text>
-        </TouchableOpacity>
+        {loading ? (
+          <TouchableOpacity
+            className="py-3 rounded-xl items-center mb-6 bg-gray-400"
+            disabled={true}
+          >
+            <Text className="text-white text-base font-semibold">Registering...</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            onPress={handleRegister}
+            className={`py-3 rounded-xl items-center mb-6 ${
+              passwordsMatch && passwordStrong ? "bg-black" : "bg-gray-300"
+            }`}
+            disabled={!passwordsMatch || !passwordStrong}
+          >
+            <Text className="text-white text-base font-semibold">Register</Text>
+          </TouchableOpacity>
+        )}
 
         {/* link to login */}
         <View className="flex-row justify-center mb-10">

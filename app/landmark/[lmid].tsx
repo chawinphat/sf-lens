@@ -1,5 +1,6 @@
 import { useRouter, useLocalSearchParams } from "expo-router";
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
+import { useAuth } from "@/authentication/AuthContext";
 import {
   View,
   Text,
@@ -9,13 +10,26 @@ import {
   ScrollView,
   SafeAreaView,
   NativeScrollEvent,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
-import { Feather, Ionicons } from "@expo/vector-icons";
-import { Attraction, Review, User, LatLng } from "@/common/types";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Attraction, Review } from "@/common/types";
 import ReviewItem from "@/components/ReviewItem";
 import { NativeSyntheticEvent } from "react-native";
 import { attractions } from "@/constants/attractions";
 import { useBookmarkStore } from "@/store/bookmarkStore";
+
+import {
+  db,
+  collection,
+  query,
+  where,
+  onSnapshot,
+  addDoc,
+  serverTimestamp,
+} from "@/authentication/firebase";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -36,6 +50,7 @@ export function TabContent({ text }: { text: string }) {
 export default function LandmarkDetail() {
   const router = useRouter();
   const { lmid } = useLocalSearchParams<{ lmid: string }>();
+  const { user } = useAuth();
   const attraction = attractions.find((item) => item.id === lmid) as Attraction;
   if (!attraction) {
     return (
@@ -45,45 +60,64 @@ export default function LandmarkDetail() {
     );
   }
 
-  const dummyUsers: Record<string, User> = {
-    user1: {
-      uid: "user1",
-      username: "Alice",
-      avatarUrl: "https://avatar.iran.liara.run/public",
-      savedAttractionIds: [],
-    },
-    user2: {
-      uid: "user2",
-      username: "Bob",
-      avatarUrl: "https://avatar.iran.liara.run/public",
-      savedAttractionIds: [],
-    },
-  };
-
-  // dummy reviews
-  const dummyReviews: Review[] = [
-    {
-      id: "r1",
-      userId: "user1",
-      attractionId: lmid as string,
-      content:
-        "Amazing place! The architecture is stunning and the view is breathtaking.",
-      createdAt: new Date("2025-04-10"),
-    },
-    {
-      id: "r2",
-      userId: "user2",
-      attractionId: lmid as string,
-      content:
-        "Loved it, but it was quite crowded when I visited during the weekend.",
-      createdAt: new Date("2025-04-08"),
-    },
-  ];
-
   const [index, setIndex] = useState(0);
   type Tab = "Overview" | "Special" | "Reviews";
   const tabs: Tab[] = ["Overview", "Special", "Reviews"];
   const [tab, setTab] = useState<Tab>("Overview");
+
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [newContent, setNewContent] = useState("");
+  const [showReviewDialog, setShowReviewDialog] = useState(false);
+
+  useEffect(() => {
+    const reviewsCol = collection(db, "reviews");
+    const q = query(reviewsCol, where("attractionId", "==", lmid));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const mapped: Review[] = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          attractionId: data.attractionId,
+          userId: data.userId,
+          username: data.username,
+          userAvatarUrl: data.userAvatarUrl,
+          content: data.content,
+          createdAt:
+            data.date && typeof data.date.toDate === "function"
+              ? data.date.toDate()
+              : data.date instanceof Date
+              ? data.date
+              : new Date(),
+        } as Review;
+      });
+      setReviews(mapped);
+    });
+    return () => unsubscribe();
+  }, [lmid]);
+
+  // add a new review to Firestore
+  const handleAddReview = async () => {
+    if (!user) {
+      console.log("Cannot add review: no authenticated user");
+      return;
+    }
+    if (!newContent.trim()) return;
+    try {
+      const reviewData = {
+        attractionId: lmid,
+        userId: user.uid,
+        username: user.displayName,
+        userAvatarUrl: user.photoURL,
+        content: newContent.trim(),
+        date: serverTimestamp(),
+      };
+      const docRef = await addDoc(collection(db, "reviews"), reviewData);
+      setNewContent("");
+    } catch (error) {
+      console.error("Error adding review:", error);
+    }
+  };
+
   const scrollRef = useRef<ScrollView>(null);
 
   const onTabPress = (t: Tab, idx: number) => {
@@ -118,7 +152,7 @@ export default function LandmarkDetail() {
             <Ionicons
               name={has ? "bookmark" : "bookmark-outline"}
               size={24}
-              color={has ? "#F59E0B" : "#000"}
+              color={has ? "#FC622C" : "#000"}
             />
           </Pressable>
         </View>
@@ -154,24 +188,30 @@ export default function LandmarkDetail() {
 
       {/* tab bar */}
       <View className="flex-row justify-around mt-4 border-b border-gray-300">
-        {tabs.map((t, i) => (
-          <Pressable
-            key={t}
-            onPress={() => onTabPress(t, i)}
-            className="py-2 flex-1 items-center"
-          >
-            <Text
-              className={`text-base font-semibold ${
-                tab === t ? "text-black" : "text-gray-500"
-              }`}
+        {tabs.map((t, i) => {
+          const label =
+            t === "Reviews" && reviews.length > 0
+              ? `Reviews(${reviews.length})`
+              : t;
+          return (
+            <Pressable
+              key={t}
+              onPress={() => onTabPress(t, i)}
+              className="py-2 flex-1 items-center"
             >
-              {t}
-            </Text>
-            {tab === t && (
-              <View className="mt-1 h-1 bg-black rounded-full w-8" />
-            )}
-          </Pressable>
-        ))}
+              <Text
+                className={`text-base font-semibold ${
+                  tab === t ? "text-black" : "text-gray-500"
+                }`}
+              >
+                {label}
+              </Text>
+              {tab === t && (
+                <View className="mt-1 h-1 bg-black rounded-full w-8" />
+              )}
+            </Pressable>
+          );
+        })}
       </View>
 
       {/* swipable tabs */}
@@ -190,20 +230,92 @@ export default function LandmarkDetail() {
         <TabContent text={attraction.special || ""} />
 
         {/* Reviews */}
-        <View style={{ width: screenWidth }} className="px-5 py-4">
-          {dummyReviews.map((review) => {
-            const author = dummyUsers[review.userId];
-            return (
-              <ReviewItem
-                key={review.id}
-                review={review}
-                author={author}
-                currentUserId="user1"
-              />
-            );
-          })}
+        <View style={{ width: screenWidth }} className="relative flex-1 px-5">
+          {reviews.length === 0 ? (
+            <View className="flex-1 items-center justify-center">
+              <Text className="text-gray-500">There is no review yet.</Text>
+            </View>
+          ) : (
+            <ScrollView
+              nestedScrollEnabled
+              contentContainerStyle={{ paddingBottom: 100 }}
+              className="flex-1"
+            >
+              {reviews
+                .slice()
+                .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+                .map((review) => (
+                  <ReviewItem
+                    key={review.id}
+                    review={review}
+                    author={{
+                      uid: review.userId,
+                      username: review.username,
+                      avatarUrl: review.userAvatarUrl,
+                      savedAttractionIds: [],
+                    }}
+                    currentUserId={user?.uid || ""}
+                  />
+                ))}
+            </ScrollView>
+          )}
+
+          <Pressable
+            onPress={() => setShowReviewDialog(true)}
+            className="
+          absolute bottom-4 left-5 right-5
+          bg-[#FC622C] py-3 rounded-2xl
+          flex-row justify-center items-center
+        "
+          >
+            <MaterialIcons
+              name="rate-review"
+              size={24}
+              color="white"
+              className="mr-2"
+            />
+            <Text className="text-white font-semibold">Write a Review</Text>
+          </Pressable>
         </View>
       </ScrollView>
+      {/* ── Add Review Dialog ─────────────────── */}
+      {showReviewDialog && (
+        <View className="absolute inset-0 bg-black/50 items-center justify-center">
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            className="w-full px-6"
+          >
+            <View className="bg-white rounded-xl p-6">
+              <Text className="text-lg font-semibold mb-4">Write a Review</Text>
+              <TextInput
+                multiline
+                numberOfLines={4}
+                placeholder="Your thoughts..."
+                value={newContent}
+                onChangeText={setNewContent}
+                className="border border-gray-300 rounded-lg px-4 py-2 mb-6"
+              />
+              <View className="flex-row justify-end space-x-4">
+                <Pressable
+                  onPress={() => setShowReviewDialog(false)}
+                  className="px-4 py-2"
+                >
+                  <Text className="text-gray-600 font-medium">Cancel</Text>
+                </Pressable>
+                <Pressable
+                  onPress={async () => {
+                    await handleAddReview();
+                    setShowReviewDialog(false);
+                  }}
+                  className="px-4 py-2 bg-[#FC622C] rounded-lg"
+                >
+                  <Text className="text-white font-medium">Submit</Text>
+                </Pressable>
+              </View>
+            </View>
+          </KeyboardAvoidingView>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
