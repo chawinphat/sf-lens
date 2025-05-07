@@ -16,7 +16,7 @@ import {
 } from "react-native";
 
 const Profile = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, updateUsername, reauthenticateUser, updatePassword } = useAuth();
   const username = user?.displayName ?? "Guest";
   const router = useRouter();
 
@@ -26,21 +26,44 @@ const Profile = () => {
   const [dialog, setDialog] = useState<"none" | "username" | "password">(
     "none"
   );
-  const [input, setInput] = useState("");
+  const [usernameInput, setUsernameInput] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
 
   const openDialog = (mode: "username" | "password") => {
-    setInput("");
+    if (mode === "username") {
+      setUsernameInput("");
+    } else {
+      setCurrentPassword("");
+      setNewPassword("");
+    }
     setDialog(mode);
   };
   const closeDialog = () => setDialog("none");
 
-  const onConfirm = () => {
-    if (dialog === "username") {
-      // update w api
-    } else if (dialog === "password") {
-      // update w api
+  const onConfirm = async () => {
+    try {
+      if (dialog === "username") {
+        await updateUsername(usernameInput);
+        Alert.alert("Success", "Username updated.");
+      } else if (dialog === "password") {
+        try {
+          await updatePassword(currentPassword, newPassword);
+        } catch (error: any) {
+          // If token is too old, reauthenticate then retry
+          if (error.code === "auth/requires-recent-login") {
+            await reauthenticateUser(currentPassword);
+            await updatePassword(currentPassword, newPassword);
+          } else {
+            throw error;
+          }
+        }
+        Alert.alert("Success", "Password updated.");
+      }
+      closeDialog();
+    } catch (error) {
+      Alert.alert("Error", "Update failed.");
     }
-    closeDialog();
   };
 
   const confirmLogout = () => {
@@ -131,11 +154,9 @@ const Profile = () => {
                 className="ml-auto"
               />
             </Pressable>
-
-            <Pressable
-              onPress={() => {
-                /* navigate to Language selection */
-              }}
+              
+            {/* <Pressable
+              
               className="flex-row items-center px-6 py-4 border-b border-gray-200"
             >
               <MaterialIcons name="language" size={24} color="#444" />
@@ -147,9 +168,9 @@ const Profile = () => {
                 color="#999"
                 className="ml-2"
               />
-            </Pressable>
+            </Pressable> */}
 
-            <View className="flex-row items-center px-6 py-4 border-b border-gray-200">
+            {/* <View className="flex-row items-center px-6 py-4 border-b border-gray-200">
               <Ionicons name="moon-outline" size={24} color="#444" />
               <Text className="ml-4 text-lg text-gray-700">Dark Mode</Text>
               <View className="ml-auto">
@@ -159,8 +180,8 @@ const Profile = () => {
                   trackColor={{ true: "#FC622C", false: "#ccc" }}
                   thumbColor={darkMode ? "#fff" : "#fff"}
                 />
-              </View>
-            </View>
+             </View> */
+            /* </View> */}
 
             <Pressable
               onPress={confirmLogout}
@@ -184,18 +205,34 @@ const Profile = () => {
               <Text className="text-lg font-semibold mb-4">
                 {dialog === "username"
                   ? "Enter new username"
-                  : "Enter new password"}
+                  : "Enter password"}
               </Text>
 
-              <TextInput
-                placeholder={
-                  dialog === "username" ? "New username" : "New password"
-                }
-                secureTextEntry={dialog === "password"}
-                value={input}
-                onChangeText={setInput}
-                className="border border-gray-300 rounded-lg px-4 py-2 mb-6"
-              />
+              {dialog === "username" ? (
+                <TextInput
+                  placeholder="New username"
+                  value={usernameInput}
+                  onChangeText={setUsernameInput}
+                  className="border border-gray-300 rounded-lg px-4 py-2 mb-6"
+                />
+              ) : (
+                <>
+                  <TextInput
+                    placeholder="Current password"
+                    secureTextEntry
+                    value={currentPassword}
+                    onChangeText={setCurrentPassword}
+                    className="border border-gray-300 rounded-lg px-4 py-2 mb-4"
+                  />
+                  <TextInput
+                    placeholder="New password"
+                    secureTextEntry
+                    value={newPassword}
+                    onChangeText={setNewPassword}
+                    className="border border-gray-300 rounded-lg px-4 py-2 mb-6"
+                  />
+                </>
+              )}
 
               <View className="flex-row justify-end space-x-4">
                 <Pressable onPress={closeDialog} className="px-4 py-2">
