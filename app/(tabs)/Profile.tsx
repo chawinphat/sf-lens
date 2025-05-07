@@ -16,7 +16,7 @@ import {
 } from "react-native";
 
 const Profile = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, updateUsername, reauthenticateUser, updatePassword } = useAuth();
   const username = user?.displayName ?? "Guest";
   const router = useRouter();
 
@@ -26,21 +26,44 @@ const Profile = () => {
   const [dialog, setDialog] = useState<"none" | "username" | "password">(
     "none"
   );
-  const [input, setInput] = useState("");
+  const [usernameInput, setUsernameInput] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
 
   const openDialog = (mode: "username" | "password") => {
-    setInput("");
+    if (mode === "username") {
+      setUsernameInput("");
+    } else {
+      setCurrentPassword("");
+      setNewPassword("");
+    }
     setDialog(mode);
   };
   const closeDialog = () => setDialog("none");
 
-  const onConfirm = () => {
-    if (dialog === "username") {
-      // update w api
-    } else if (dialog === "password") {
-      // update w api
+  const onConfirm = async () => {
+    try {
+      if (dialog === "username") {
+        await updateUsername(usernameInput);
+        Alert.alert("Success", "Username updated.");
+      } else if (dialog === "password") {
+        try {
+          await updatePassword(currentPassword, newPassword);
+        } catch (error: any) {
+          // If token is too old, reauthenticate then retry
+          if (error.code === "auth/requires-recent-login") {
+            await reauthenticateUser(currentPassword);
+            await updatePassword(currentPassword, newPassword);
+          } else {
+            throw error;
+          }
+        }
+        Alert.alert("Success", "Password updated.");
+      }
+      closeDialog();
+    } catch (error) {
+      Alert.alert("Error", "Update failed.");
     }
-    closeDialog();
   };
 
   const confirmLogout = () => {
@@ -187,15 +210,31 @@ const Profile = () => {
                   : "Enter new password"}
               </Text>
 
-              <TextInput
-                placeholder={
-                  dialog === "username" ? "New username" : "New password"
-                }
-                secureTextEntry={dialog === "password"}
-                value={input}
-                onChangeText={setInput}
-                className="border border-gray-300 rounded-lg px-4 py-2 mb-6"
-              />
+              {dialog === "username" ? (
+                <TextInput
+                  placeholder="New username"
+                  value={usernameInput}
+                  onChangeText={setUsernameInput}
+                  className="border border-gray-300 rounded-lg px-4 py-2 mb-6"
+                />
+              ) : (
+                <>
+                  <TextInput
+                    placeholder="Current password"
+                    secureTextEntry
+                    value={currentPassword}
+                    onChangeText={setCurrentPassword}
+                    className="border border-gray-300 rounded-lg px-4 py-2 mb-4"
+                  />
+                  <TextInput
+                    placeholder="New password"
+                    secureTextEntry
+                    value={newPassword}
+                    onChangeText={setNewPassword}
+                    className="border border-gray-300 rounded-lg px-4 py-2 mb-6"
+                  />
+                </>
+              )}
 
               <View className="flex-row justify-end space-x-4">
                 <Pressable onPress={closeDialog} className="px-4 py-2">

@@ -8,7 +8,7 @@ import {
   signInAnonymously as _anon,
 } from './firebase';
 
-import { updateProfile, onAuthStateChanged } from 'firebase/auth';
+import { updateProfile, onAuthStateChanged, updatePassword as firebaseUpdatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 
 export const AuthContext = createContext();
 
@@ -98,8 +98,55 @@ export function AuthProvider({ children }) {
     return userCredential;
   };
 
+  const updateUsername = async (newUsername) => {
+    setLoading(true);
+    try {
+      await updateProfile(auth.currentUser, { displayName: newUsername });
+      setUser({ ...auth.currentUser });
+      setLoading(false);
+    } catch (error) {
+      console.error("Username update failed:", error);
+      setLoading(false);
+      throw error;
+    }
+  };
+
+  const reauthenticateUser = async (currentPassword) => {
+    setLoading(true);
+    try {
+      const credential = EmailAuthProvider.credential(
+        auth.currentUser.email,
+        currentPassword
+      );
+      await reauthenticateWithCredential(auth.currentUser, credential);
+      setLoading(false);
+    } catch (error) {
+      console.error("Reauthentication failed:", error);
+      setLoading(false);
+      throw error;
+    }
+  };
+
+  const updatePassword = async (currentPassword, newPassword) => {
+    setLoading(true);
+    try {
+      // Ensure user has recently signed in
+      const credential = EmailAuthProvider.credential(
+        auth.currentUser.email,
+        currentPassword
+      );
+      await reauthenticateWithCredential(auth.currentUser, credential);
+      await firebaseUpdatePassword(auth.currentUser, newPassword);
+      setLoading(false);
+    } catch (error) {
+      console.error("Password update failed:", error);
+      setLoading(false);
+      throw error;
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, register, login, error, clearError, logout, continueAsGuest }}>
+    <AuthContext.Provider value={{ user, loading, register, login, updateUsername, reauthenticateUser, updatePassword, error, clearError, logout, continueAsGuest }}>
       {children}
     </AuthContext.Provider>
   );
