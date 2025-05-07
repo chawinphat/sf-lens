@@ -9,7 +9,12 @@ import {
   FlatList,
 } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import MapView, { Marker, PROVIDER_DEFAULT, Region, Circle } from "react-native-maps";
+import MapView, {
+  Marker,
+  PROVIDER_DEFAULT,
+  Region,
+  Circle,
+} from "react-native-maps";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { attractions } from "@/constants/attractions";
 import type { Attraction } from "@/common/types";
@@ -17,7 +22,8 @@ import { useRouter } from "expo-router";
 import { useBookmarkStore } from "@/store/bookmarkStore";
 import SearchBar from "@/components/SearchBar";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useUserLocation } from "@/hooks/useUserLocation"
+import { useUserLocation } from "@/hooks/useUserLocation";
+import { shareDeepLink } from "@/common/utils";
 
 export default function MapScreen() {
   const router = useRouter();
@@ -53,8 +59,13 @@ export default function MapScreen() {
 
   const snapPoints = ["40%"];
 
-  const openDirections = useCallback((lat: number, lng: number) => Linking.openURL(`https://www.google.com/maps/dir/?api=1&origin=37.7749,-122.4194&destination=${lat},${lng}`), []);
-
+  const openDirections = useCallback(
+    (lat: number, lng: number) =>
+      Linking.openURL(
+        `https://www.google.com/maps/dir/?api=1&origin=37.7749,-122.4194&destination=${lat},${lng}`
+      ),
+    []
+  );
 
   const onMarkerPress = useCallback(
     (id: string) => {
@@ -135,9 +146,21 @@ export default function MapScreen() {
             },
           ]}
         >
-          <Circle center={{ latitude: userLoc.latitude, longitude: userLoc.longitude }}  radius={100} fillColor="rgba(0,122,255,0.15)"  strokeColor="rgba(0,122,255,0.4)" strokeWidth={1} />
+          <Circle
+            center={{
+              latitude: userLoc.latitude,
+              longitude: userLoc.longitude,
+            }}
+            radius={100}
+            fillColor="rgba(0,122,255,0.15)"
+            strokeColor="rgba(0,122,255,0.4)"
+            strokeWidth={1}
+          />
           <Marker
-            coordinate={{ latitude: userLoc.latitude, longitude: userLoc.longitude  }}
+            coordinate={{
+              latitude: userLoc.latitude,
+              longitude: userLoc.longitude,
+            }}
             pinColor="blue"
           >
             <MaterialIcons name="my-location" size={24} color="#007AFF" />
@@ -146,11 +169,19 @@ export default function MapScreen() {
             <Marker
               key={a.id}
               coordinate={a.location}
-              onPress={() => onMarkerPress(a.id)}>
+              onPress={() => onMarkerPress(a.id)}
+            >
               <View className="items-center">
                 <Image
                   source={{ uri: a.images_landscape[0] }}
-                  style={{ width: 40, height: 40, borderRadius: 20, borderWidth: 2, borderColor: "#fff" }}  /> 
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 20,
+                    borderWidth: 2,
+                    borderColor: "#fff",
+                  }}
+                />
               </View>
             </Marker>
           ))}
@@ -197,14 +228,22 @@ export default function MapScreen() {
                   className="flex-row items-center px-3 py-3 mr-2 bg-orange-500/20 rounded-full"
                   onPress={() => selected && toggle(selected.id)}
                 >
-                  <MaterialIcons name={has ? "bookmark" : "bookmark-border"} size={20} color="#C2410C" />
+                  <MaterialIcons
+                    name={has ? "bookmark" : "bookmark-border"}
+                    size={20}
+                    color="#C2410C"
+                  />
 
                   <Text className="text-md font-medium text-orange-800">
                     {has ? "Saved" : "Save"}
                   </Text>
                 </Pressable>
-                <Pressable className="flex-row items-center px-3 py-3 mr-2 bg-orange-500/20 rounded-full">
-
+                <Pressable
+                  className="flex-row items-center px-3 py-3 mr-2 bg-orange-500/20 rounded-full"
+                  onPress={() =>
+                    shareDeepLink(`/landmark/${selected.id}`, selected.name)
+                  }
+                >
                   <MaterialIcons name="share" size={20} color="#C2410C" />
                   <Text className="text-md font-medium text-orange-800">
                     Share
