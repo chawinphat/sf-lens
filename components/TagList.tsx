@@ -19,7 +19,7 @@ const TagList = ({
             <TouchableOpacity
               onPress={() => onSelectCategory?.(cat)}
               key={cat}
-              className="bg-amber-500 py-3 px-4 rounded-2xl mr-2"
+              className="bg-[#FC622C] py-3 px-4 rounded-2xl mr-2"
             >
               <Text className="text-white font-semibold">{cat}</Text>
             </TouchableOpacity>

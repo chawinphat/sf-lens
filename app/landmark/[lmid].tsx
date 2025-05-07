@@ -14,12 +14,13 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { Attraction, Review } from "@/common/types";
 import ReviewItem from "@/components/ReviewItem";
 import { NativeSyntheticEvent } from "react-native";
 import { attractions } from "@/constants/attractions";
 import { useBookmarkStore } from "@/store/bookmarkStore";
+import { shareDeepLink } from "@/common/utils";
 
 import {
   db,
@@ -51,6 +52,7 @@ export default function LandmarkDetail() {
   const router = useRouter();
   const { lmid } = useLocalSearchParams<{ lmid: string }>();
   const { user } = useAuth();
+
   const attraction = attractions.find((item) => item.id === lmid) as Attraction;
   if (!attraction) {
     return (
@@ -136,19 +138,24 @@ export default function LandmarkDetail() {
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       {/* header */}
-      <View className="flex-row items-center justify-between px-5 py-3">
-        <Pressable onPress={() => router.back()} className="p-2">
+      <View className="relative items-center px-5 py-3 bg-gray-50">
+        <Pressable
+          onPress={() => router.back()}
+          className="absolute left-5 p-2"
+        >
           <Ionicons name="arrow-back" size={24} color="#000" />
         </Pressable>
-        <Text className="flex-1 text-center text-lg font-semibold">
-          {attraction.name}
-        </Text>
-        <View className="flex-row space-x-4">
-          {/* <Pressable onPress={() => {}} className="p-2">
+
+        <Text className="text-lg font-semibold">{attraction.name}</Text>
+
+        <View className="absolute right-5 flex-row space-x-4">
+          <Pressable
+            onPress={() => shareDeepLink(`/landmark/${lmid}`, attraction.name)}
+            className="p-2"
+          >
             <Feather name="share-2" size={24} color="#000" />
-          </Pressable> */}
-          <Pressable onPress={() => toggle(lmid as string)} className="p-2">
-            {/* <Feather name="bookmark" size={24} color="#000" /> */}
+          </Pressable>
+          <Pressable onPress={() => toggle(lmid)} className="p-2">
             <Ionicons
               name={has ? "bookmark" : "bookmark-outline"}
               size={24}
