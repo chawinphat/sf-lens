@@ -154,11 +154,9 @@ const Profile = () => {
                 className="ml-auto"
               />
             </Pressable>
-
-            <Pressable
-              onPress={() => {
-                /* navigate to Language selection */
-              }}
+              
+            {/* <Pressable
+              
               className="flex-row items-center px-6 py-4 border-b border-gray-200"
             >
               <MaterialIcons name="language" size={24} color="#444" />
@@ -170,9 +168,9 @@ const Profile = () => {
                 color="#999"
                 className="ml-2"
               />
-            </Pressable>
+            </Pressable> */}
 
-            <View className="flex-row items-center px-6 py-4 border-b border-gray-200">
+            {/* <View className="flex-row items-center px-6 py-4 border-b border-gray-200">
               <Ionicons name="moon-outline" size={24} color="#444" />
               <Text className="ml-4 text-lg text-gray-700">Dark Mode</Text>
               <View className="ml-auto">
@@ -182,8 +180,8 @@ const Profile = () => {
                   trackColor={{ true: "#FC622C", false: "#ccc" }}
                   thumbColor={darkMode ? "#fff" : "#fff"}
                 />
-              </View>
-            </View>
+             </View> */
+            /* </View> */}
 
             <Pressable
               onPress={confirmLogout}
@@ -207,7 +205,7 @@ const Profile = () => {
               <Text className="text-lg font-semibold mb-4">
                 {dialog === "username"
                   ? "Enter new username"
-                  : "Enter new password"}
+                  : "Enter password"}
               </Text>
 
               {dialog === "username" ? (
