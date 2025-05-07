@@ -41,6 +41,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const register = async (email, password, username) => {
+    setLoading(true);
     try {
       const userCredential = await _register(auth, email, password);
       await updateProfile(auth.currentUser, { displayName: username });
@@ -48,16 +49,21 @@ export function AuthProvider({ children }) {
       const avatarUrl = `https://avatar.iran.liara.run/public/${randomId}`;
       await updateProfile(auth.currentUser, { photoURL: avatarUrl });
       setUser(auth.currentUser);
+      setLoading(false);
       return userCredential;
     } catch (error) {
       console.error("Registration or profile update failed:", error);
+      setLoading(false);
       throw error;
     }
   };
   
   const login = async (email, password) => {
+    setLoading(true);
     try {
-      return await _login(auth, email, password);
+      const result = await _login(auth, email, password);
+      setLoading(false);
+      return result;
     } catch (error) {
       let friendlyMessage;
       switch (error.code) {
@@ -76,14 +82,19 @@ export function AuthProvider({ children }) {
           friendlyMessage = 'An unexpected error occurred. Please try again later.';
       }
       setError(friendlyMessage);
+      setLoading(false);
       throw error;
     }
   };
 
-  const logout = () => _logout(auth);
+  const logout = async () => {
+    setLoading(true);
+    await _logout(auth);
+    setLoading(false);
+  };
 
   const continueAsGuest = async () => {
-    const userCredential = await _anon(auth);
+    const userCredential = await _anon(auth); 
     return userCredential;
   };
 
