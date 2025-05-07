@@ -15,10 +15,12 @@ export interface LatLng {
 export interface Review {
   id: string;
   userId: string;
-  attractionId: string;
+  username: string;
+  userAvatarUrl?: string;
   content: string;
   createdAt: Date;
 }
+
 
 export type Category =
   | "Culture"

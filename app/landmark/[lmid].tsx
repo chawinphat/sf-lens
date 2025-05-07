@@ -1,5 +1,6 @@
 import { useRouter, useLocalSearchParams } from "expo-router";
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
+import { useAuth } from "@/authentication/AuthContext";
 import {
   View,
   Text,
@@ -9,13 +10,24 @@ import {
   ScrollView,
   SafeAreaView,
   NativeScrollEvent,
+  TextInput,
 } from "react-native";
-import { Feather, Ionicons } from "@expo/vector-icons";
-import { Attraction, Review, User, LatLng } from "@/common/types";
+import {Ionicons } from "@expo/vector-icons";
+import { Attraction, Review } from "@/common/types";
 import ReviewItem from "@/components/ReviewItem";
 import { NativeSyntheticEvent } from "react-native";
 import { attractions } from "@/constants/attractions";
 import { useBookmarkStore } from "@/store/bookmarkStore";
+
+import {
+  db,
+  collection,
+  query,
+  where,
+  onSnapshot,
+  addDoc,
+  serverTimestamp
+} from "@/authentication/firebase";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -36,6 +48,7 @@ export function TabContent({ text }: { text: string }) {
 export default function LandmarkDetail() {
   const router = useRouter();
   const { lmid } = useLocalSearchParams<{ lmid: string }>();
+  const { user } = useAuth();
   const attraction = attractions.find((item) => item.id === lmid) as Attraction;
   if (!attraction) {
     return (
@@ -45,45 +58,62 @@ export default function LandmarkDetail() {
     );
   }
 
-  const dummyUsers: Record<string, User> = {
-    user1: {
-      uid: "user1",
-      username: "Alice",
-      avatarUrl: "https://avatar.iran.liara.run/public",
-      savedAttractionIds: [],
-    },
-    user2: {
-      uid: "user2",
-      username: "Bob",
-      avatarUrl: "https://avatar.iran.liara.run/public",
-      savedAttractionIds: [],
-    },
-  };
-
-  // dummy reviews
-  const dummyReviews: Review[] = [
-    {
-      id: "r1",
-      userId: "user1",
-      attractionId: lmid as string,
-      content:
-        "Amazing place! The architecture is stunning and the view is breathtaking.",
-      createdAt: new Date("2025-04-10"),
-    },
-    {
-      id: "r2",
-      userId: "user2",
-      attractionId: lmid as string,
-      content:
-        "Loved it, but it was quite crowded when I visited during the weekend.",
-      createdAt: new Date("2025-04-08"),
-    },
-  ];
-
   const [index, setIndex] = useState(0);
   type Tab = "Overview" | "Special" | "Reviews";
   const tabs: Tab[] = ["Overview", "Special", "Reviews"];
   const [tab, setTab] = useState<Tab>("Overview");
+
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [newContent, setNewContent] = useState('');
+
+ 
+  useEffect(() => {
+    const reviewsCol = collection(db, 'reviews');
+    const q = query(reviewsCol, where('attractionId', '==', lmid));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const mapped: Review[] = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          attractionId: data.attractionId,
+          userId: data.userId,
+          username: data.username,
+          userAvatarUrl: data.userAvatarUrl,
+          content: data.content,
+          createdAt: data.date && typeof data.date.toDate === 'function'
+            ? data.date.toDate()
+            : data.date instanceof Date
+              ? data.date
+              : new Date(),
+        } as Review;
+      });
+      setReviews(mapped);
+    });
+    return () => unsubscribe();
+  }, [lmid]);
+
+  // add a new review to Firestore
+  const handleAddReview = async () => {
+    if (!user) {
+      console.log('Cannot add review: no authenticated user');
+      return;
+    }
+    if (!newContent.trim()) return;
+    try {
+      const reviewData = {
+        attractionId: lmid,
+        userId: user.uid,
+        username:user.displayName,
+        content: newContent.trim(),
+        date: serverTimestamp(),
+      };
+      const docRef = await addDoc(collection(db, 'reviews'), reviewData);
+      setNewContent('');
+    } catch (error) {
+      console.error('Error adding review:', error);
+    }
+  };
+
   const scrollRef = useRef<ScrollView>(null);
 
   const onTabPress = (t: Tab, idx: number) => {
@@ -191,17 +221,41 @@ export default function LandmarkDetail() {
 
         {/* Reviews */}
         <View style={{ width: screenWidth }} className="px-5 py-4">
-          {dummyReviews.map((review) => {
-            const author = dummyUsers[review.userId];
-            return (
+          
+          <Text className="text-lg font-semibold mb-2">
+            {reviews.length > 0 ? `Reviews (${reviews.length})` : "No reviews yet"}
+          </Text>
+
+          {/* review submission */}
+          <View style={{ padding: 20, borderTopWidth: 1, borderColor: '#ccc' }}>
+            <TextInput
+              value={newContent}
+              onChangeText={setNewContent}
+              placeholder="Write your review..."
+              style={{ borderWidth: 1, borderColor: '#ccc', padding: 10, borderRadius: 4, marginBottom: 10 }}
+            />
+            <Pressable onPress={handleAddReview} style={{ alignItems: 'center', padding: 10, backgroundColor: '#007AFF', borderRadius: 4 }}>
+              <Text style={{ color: '#fff' }}>Submit Review</Text>
+            </Pressable>
+          </View>
+
+          {/* list of reviews */}
+          {reviews
+            .slice()
+            .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+            .map((review) => (
               <ReviewItem
                 key={review.id}
                 review={review}
-                author={author}
-                currentUserId="user1"
+                author={{
+                  uid: review.userId,
+                  username: review.username,
+                  avatarUrl: review.userAvatarUrl || "https://avatar.iran.liara.run/public",
+                  savedAttractionIds: [],   // required by User type
+                }}
+                currentUserId={user.uid}
               />
-            );
-          })}
+            ))}
         </View>
       </ScrollView>
     </SafeAreaView>

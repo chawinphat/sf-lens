@@ -14,7 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../authentication/AuthContext";
 
 const Register = () => {
-  const { register, user, loading, updateProfile } = useAuth();
+  const { register, user, loading } = useAuth();
   const router = useRouter();
 
   const [username, setUsername] = useState("");
