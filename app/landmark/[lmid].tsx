@@ -104,6 +104,7 @@ export default function LandmarkDetail() {
         attractionId: lmid,
         userId: user.uid,
         username:user.displayName,
+        userAvatarUrl: user.photoURL,
         content: newContent.trim(),
         date: serverTimestamp(),
       };
@@ -250,7 +251,7 @@ export default function LandmarkDetail() {
                 author={{
                   uid: review.userId,
                   username: review.username,
-                  avatarUrl: review.userAvatarUrl || "https://avatar.iran.liara.run/public",
+                  avatarUrl: review.userAvatarUrl,
                   savedAttractionIds: [],   // required by User type
                 }}
                 currentUserId={user?.uid || ""}

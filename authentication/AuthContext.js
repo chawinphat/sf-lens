@@ -44,7 +44,8 @@ export function AuthProvider({ children }) {
     try {
       const userCredential = await _register(auth, email, password);
       await updateProfile(auth.currentUser, { displayName: username });
-      const avatarUrl = `https://avatar.iran.liara.run/public/${auth.currentUser.uid}`;
+      const randomId = Math.floor(Math.random() * 99) + 1;
+      const avatarUrl = `https://avatar.iran.liara.run/public/${randomId}`;
       await updateProfile(auth.currentUser, { photoURL: avatarUrl });
       setUser(auth.currentUser);
       return userCredential;
