@@ -267,22 +267,24 @@ export default function LandmarkDetail() {
             </ScrollView>
           )}
 
-          <Pressable
-            onPress={() => setShowReviewDialog(true)}
-            className="
+          {user && (
+            <Pressable
+              onPress={() => setShowReviewDialog(true)}
+              className="
           absolute bottom-4 left-5 right-5
           bg-[#FC622C] py-3 rounded-2xl
           flex-row justify-center items-center
         "
-          >
-            <MaterialIcons
-              name="rate-review"
-              size={24}
-              color="white"
-              className="mr-2"
-            />
-            <Text className="text-white font-semibold">Write a Review</Text>
-          </Pressable>
+            >
+              <MaterialIcons
+                name="rate-review"
+                size={24}
+                color="white"
+                className="mr-2"
+              />
+              <Text className="text-white font-semibold">Write a Review</Text>
+            </Pressable>
+          )}
         </View>
       </ScrollView>
       {/* ── Add Review Dialog ─────────────────── */}
