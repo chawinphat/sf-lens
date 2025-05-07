@@ -11,8 +11,10 @@ import {
   SafeAreaView,
   NativeScrollEvent,
   TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
-import {Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { Attraction, Review } from "@/common/types";
 import ReviewItem from "@/components/ReviewItem";
 import { NativeSyntheticEvent } from "react-native";
@@ -26,7 +28,7 @@ import {
   where,
   onSnapshot,
   addDoc,
-  serverTimestamp
+  serverTimestamp,
 } from "@/authentication/firebase";
 
 const { width: screenWidth } = Dimensions.get("window");
@@ -64,14 +66,14 @@ export default function LandmarkDetail() {
   const [tab, setTab] = useState<Tab>("Overview");
 
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [newContent, setNewContent] = useState('');
+  const [newContent, setNewContent] = useState("");
+  const [showReviewDialog, setShowReviewDialog] = useState(false);
 
- 
   useEffect(() => {
-    const reviewsCol = collection(db, 'reviews');
-    const q = query(reviewsCol, where('attractionId', '==', lmid));
+    const reviewsCol = collection(db, "reviews");
+    const q = query(reviewsCol, where("attractionId", "==", lmid));
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const mapped: Review[] = snapshot.docs.map(doc => {
+      const mapped: Review[] = snapshot.docs.map((doc) => {
         const data = doc.data();
         return {
           id: doc.id,
@@ -80,9 +82,10 @@ export default function LandmarkDetail() {
           username: data.username,
           userAvatarUrl: data.userAvatarUrl,
           content: data.content,
-          createdAt: data.date && typeof data.date.toDate === 'function'
-            ? data.date.toDate()
-            : data.date instanceof Date
+          createdAt:
+            data.date && typeof data.date.toDate === "function"
+              ? data.date.toDate()
+              : data.date instanceof Date
               ? data.date
               : new Date(),
         } as Review;
@@ -95,7 +98,7 @@ export default function LandmarkDetail() {
   // add a new review to Firestore
   const handleAddReview = async () => {
     if (!user) {
-      console.log('Cannot add review: no authenticated user');
+      console.log("Cannot add review: no authenticated user");
       return;
     }
     if (!newContent.trim()) return;
@@ -103,15 +106,15 @@ export default function LandmarkDetail() {
       const reviewData = {
         attractionId: lmid,
         userId: user.uid,
-        username:user.displayName,
+        username: user.displayName,
         userAvatarUrl: user.photoURL,
         content: newContent.trim(),
         date: serverTimestamp(),
       };
-      const docRef = await addDoc(collection(db, 'reviews'), reviewData);
-      setNewContent('');
+      const docRef = await addDoc(collection(db, "reviews"), reviewData);
+      setNewContent("");
     } catch (error) {
-      console.error('Error adding review:', error);
+      console.error("Error adding review:", error);
     }
   };
 
@@ -149,7 +152,7 @@ export default function LandmarkDetail() {
             <Ionicons
               name={has ? "bookmark" : "bookmark-outline"}
               size={24}
-              color={has ? "#F59E0B" : "#000"}
+              color={has ? "#FC622C" : "#000"}
             />
           </Pressable>
         </View>
@@ -185,24 +188,30 @@ export default function LandmarkDetail() {
 
       {/* tab bar */}
       <View className="flex-row justify-around mt-4 border-b border-gray-300">
-        {tabs.map((t, i) => (
-          <Pressable
-            key={t}
-            onPress={() => onTabPress(t, i)}
-            className="py-2 flex-1 items-center"
-          >
-            <Text
-              className={`text-base font-semibold ${
-                tab === t ? "text-black" : "text-gray-500"
-              }`}
+        {tabs.map((t, i) => {
+          const label =
+            t === "Reviews" && reviews.length > 0
+              ? `Reviews(${reviews.length})`
+              : t;
+          return (
+            <Pressable
+              key={t}
+              onPress={() => onTabPress(t, i)}
+              className="py-2 flex-1 items-center"
             >
-              {t}
-            </Text>
-            {tab === t && (
-              <View className="mt-1 h-1 bg-black rounded-full w-8" />
-            )}
-          </Pressable>
-        ))}
+              <Text
+                className={`text-base font-semibold ${
+                  tab === t ? "text-black" : "text-gray-500"
+                }`}
+              >
+                {label}
+              </Text>
+              {tab === t && (
+                <View className="mt-1 h-1 bg-black rounded-full w-8" />
+              )}
+            </Pressable>
+          );
+        })}
       </View>
 
       {/* swipable tabs */}
@@ -221,44 +230,92 @@ export default function LandmarkDetail() {
         <TabContent text={attraction.special || ""} />
 
         {/* Reviews */}
-        <View style={{ width: screenWidth }} className="px-5 py-4">
-          
-          <Text className="text-lg font-semibold mb-2">
-            {reviews.length > 0 ? `Reviews (${reviews.length})` : "No reviews yet"}
-          </Text>
+        <View style={{ width: screenWidth }} className="relative flex-1 px-5">
+          {reviews.length === 0 ? (
+            <View className="flex-1 items-center justify-center">
+              <Text className="text-gray-500">There is no review yet.</Text>
+            </View>
+          ) : (
+            <ScrollView
+              nestedScrollEnabled
+              contentContainerStyle={{ paddingBottom: 100 }}
+              className="flex-1"
+            >
+              {reviews
+                .slice()
+                .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+                .map((review) => (
+                  <ReviewItem
+                    key={review.id}
+                    review={review}
+                    author={{
+                      uid: review.userId,
+                      username: review.username,
+                      avatarUrl: review.userAvatarUrl,
+                      savedAttractionIds: [],
+                    }}
+                    currentUserId={user?.uid || ""}
+                  />
+                ))}
+            </ScrollView>
+          )}
 
-          {/* review submission */}
-          <View style={{ padding: 20, borderTopWidth: 1, borderColor: '#ccc' }}>
-            <TextInput
-              value={newContent}
-              onChangeText={setNewContent}
-              placeholder="Write your review..."
-              style={{ borderWidth: 1, borderColor: '#ccc', padding: 10, borderRadius: 4, marginBottom: 10 }}
+          <Pressable
+            onPress={() => setShowReviewDialog(true)}
+            className="
+          absolute bottom-4 left-5 right-5
+          bg-[#FC622C] py-3 rounded-2xl
+          flex-row justify-center items-center
+        "
+          >
+            <MaterialIcons
+              name="rate-review"
+              size={24}
+              color="white"
+              className="mr-2"
             />
-            <Pressable onPress={handleAddReview} style={{ alignItems: 'center', padding: 10, backgroundColor: '#007AFF', borderRadius: 4 }}>
-              <Text style={{ color: '#fff' }}>Submit Review</Text>
-            </Pressable>
-          </View>
-
-          {/* list of reviews */}
-          {reviews
-            .slice()
-            .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-            .map((review) => (
-              <ReviewItem
-                key={review.id}
-                review={review}
-                author={{
-                  uid: review.userId,
-                  username: review.username,
-                  avatarUrl: review.userAvatarUrl,
-                  savedAttractionIds: [],   // required by User type
-                }}
-                currentUserId={user?.uid || ""}
-              />
-            ))}
+            <Text className="text-white font-semibold">Write a Review</Text>
+          </Pressable>
         </View>
       </ScrollView>
+      {/* ── Add Review Dialog ─────────────────── */}
+      {showReviewDialog && (
+        <View className="absolute inset-0 bg-black/50 items-center justify-center">
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            className="w-full px-6"
+          >
+            <View className="bg-white rounded-xl p-6">
+              <Text className="text-lg font-semibold mb-4">Write a Review</Text>
+              <TextInput
+                multiline
+                numberOfLines={4}
+                placeholder="Your thoughts..."
+                value={newContent}
+                onChangeText={setNewContent}
+                className="border border-gray-300 rounded-lg px-4 py-2 mb-6"
+              />
+              <View className="flex-row justify-end space-x-4">
+                <Pressable
+                  onPress={() => setShowReviewDialog(false)}
+                  className="px-4 py-2"
+                >
+                  <Text className="text-gray-600 font-medium">Cancel</Text>
+                </Pressable>
+                <Pressable
+                  onPress={async () => {
+                    await handleAddReview();
+                    setShowReviewDialog(false);
+                  }}
+                  className="px-4 py-2 bg-[#FC622C] rounded-lg"
+                >
+                  <Text className="text-white font-medium">Submit</Text>
+                </Pressable>
+              </View>
+            </View>
+          </KeyboardAvoidingView>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
